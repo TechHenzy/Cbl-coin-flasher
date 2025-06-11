@@ -1,0 +1,19 @@
+{
+  "name": "cbl-coin-flasher",
+  "version": "1.0.0",
+  "description": "CBL Coin Flasher - Crypto Wallet Flashing Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": ["crypto", "wallet", "flasher", "blockchain"],
+  "author": "CBL",
+  "license": "MIT"
+}
