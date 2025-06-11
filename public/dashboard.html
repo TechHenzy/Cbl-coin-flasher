@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - CBL COIN FLASHER</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>CBL COIN FLASHER</h2>
+            </div>
+            <div class="nav-menu">
+                <span class="user-welcome">Welcome, <span id="username"></span></span>
+                <div class="profile-section">
+                    <div class="profile-icon" onclick="toggleProfileMenu()">
+                        <img id="navProfileImage" src="/placeholder.svg" alt="" style="display: none;">
+                        <i id="navProfileIcon" class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                        <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+                        <a href="flashpage.html"><i class="fas fa-bolt"></i> Start Flashing</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+                <button class="nav-toggle" id="navToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+            <a href="flashpage.html"><i class="fas fa-bolt"></i> Start Flashing</a>
+            <div class="mobile-menu-divider"></div>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <main class="dashboard">
+        <div class="dashboard-container">
+            <!-- Update the welcome section to be more mobile-friendly -->
+            <div class="dashboard-header">
+                <div class="welcome-section">
+                    <div class="profile-avatar">
+                        <img id="dashProfileImage" src="/placeholder.svg" alt="" style="display: none;">
+                        <i id="dashProfileIcon" class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="welcome-text">
+                        <h1 id="welcomeMessage">Welcome back 🤗</h1>
+                        <p>Ready to start flashing?</p>
+                    </div>
+                </div>
+                <div class="user-status" id="userStatus">
+                    <span class="status-badge">Free User</span>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Subscription Card -->
+                <div class="dashboard-card subscription-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-crown"></i> Subscription Plans</h3>
+                    </div>
+                    <div class="card-content">
+                        <p>Choose your subscription plan to access wallet flashing features</p>
+                        <button class="btn btn-primary" onclick="showSubscriptionModal()">View Plans</button>
+                    </div>
+                </div>
+
+                <!-- Access Wallet Card -->
+                <div class="dashboard-card wallet-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-wallet"></i> Access Wallets</h3>
+                    </div>
+                    <div class="card-content">
+                        <p id="walletStatus">Your wallet list is empty</p>
+                        <button class="btn btn-primary" id="walletBtn" onclick="checkWalletAccess()">Subscribe</button>
+                    </div>
+                </div>
+
+                <!-- Messages Card -->
+                <div class="dashboard-card messages-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-envelope"></i> Messages <span id="messageCount" class="message-count">0</span></h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="messagesList">
+                            <p>No messages</p>
+                        </div>
+                        <button class="btn btn-outline" onclick="showInboxModal()" style="margin-top: 1rem;">
+                            <i class="fas fa-inbox"></i> View All Messages
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Account Info Card -->
+                <div class="dashboard-card account-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user"></i> Account Info</h3>
+                    </div>
+                    <div class="card-content">
+                        <p><strong>Username:</strong> <span id="accountUsername"></span></p>
+                        <p><strong>Email:</strong> <span id="accountEmail"></span></p>
+                        <p><strong>Plan:</strong> <span id="currentPlan">No active plan</span></p>
+                        <p><strong>Expires:</strong> <span id="planExpiry">N/A</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Inbox Modal -->
+    <div id="inboxModal" class="modal">
+        <div class="modal-content inbox-modal">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-inbox"></i> All Messages</h2>
+            <div id="allMessagesList" class="messages-list">
+                <!-- Messages will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Detail Modal -->
+    <div id="messageDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="message-detail">
+                <h3 id="messageDetailTitle"></h3>
+                <div id="messageDetailContent"></div>
+                <div id="messageDetailTime"></div>
+                <button class="btn btn-primary" onclick="closeMessageDetail()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Modal -->
+    <div id="subscriptionModal" class="modal">
+        <div class="modal-content subscription-modal">
+            <span class="close">&times;</span>
+            <h2>Choose Your Subscription Plan</h2>
+            
+            <div class="plans-grid">
+                <!-- 1 Month Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>1 Month Plan</h3>
+                        <div class="plan-price">₦30,000</div>
+                    </div>
+                    <div class="plan-content">
+                        <button class="btn btn-outline wallet-btn" onclick="showWallets('1month')">
+                            View Wallets Available
+                        </button>
+                        <div class="wallet-list" id="wallets-1month" style="display: none;">
+                            <div class="wallet-item">
+                                <img src="img/coinbase.png" alt="Coinbase" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Coinbase</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/trustwallet.png" alt="Trust Wallet" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Trust Wallet</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary subscribe-btn" onclick="subscribe('1month', 30000)">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3 Months Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>3 Months Plan</h3>
+                        <div class="plan-price">₦50,000</div>
+                    </div>
+                    <div class="plan-content">
+                        <button class="btn btn-outline wallet-btn" onclick="showWallets('3months')">
+                            View Wallets Available
+                        </button>
+                        <div class="wallet-list" id="wallets-3months" style="display: none;">
+                            <div class="wallet-item">
+                                <img src="img/coinbase.png" alt="Coinbase" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Coinbase</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/trustwallet.png" alt="Trust Wallet" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Trust Wallet</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/atomic.png" alt="Atomic" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Atomic</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary subscribe-btn" onclick="subscribe('3months', 50000)">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 6 Months Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>6 Months Plan</h3>
+                        <div class="plan-price">₦70,000</div>
+                    </div>
+                    <div class="plan-content">
+                        <button class="btn btn-outline wallet-btn" onclick="showWallets('6months')">
+                            View Wallets Available
+                        </button>
+                        <div class="wallet-list" id="wallets-6months" style="display: none;">
+                            <div class="wallet-item">
+                                <img src="img/trustwallet.png" alt="Trust Wallet" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Trust Wallet</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/coinbase.png" alt="Coinbase" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Coinbase</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/atomic.png" alt="Atomic" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Atomic</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/binance.png" alt="Binance" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Binance</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/okx.png" alt="OKX" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>OKX</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary subscribe-btn" onclick="subscribe('6months', 70000)">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 8 Months Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>8 Months Plan</h3>
+                        <div class="plan-price">₦95,000</div>
+                    </div>
+                    <div class="plan-content">
+                        <button class="btn btn-outline wallet-btn" onclick="showWallets('8months')">
+                            View Wallets Available
+                        </button>
+                        <div class="wallet-list" id="wallets-8months" style="display: none;">
+                            <div class="wallet-item">
+                                <img src="img/trustwallet.png" alt="Trust Wallet" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Trust Wallet</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/coinbase.png" alt="Coinbase" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Coinbase</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/atomic.png" alt="Atomic" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Atomic</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/binance.png" alt="Binance" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Binance</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/okx.png" alt="OKX" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>OKX</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/crypto.png" alt="Crypto.com" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Crypto.com</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/coinex.png" alt="CoinEx" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>CoinEx</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/blockchain.png" alt="Blockchain" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Blockchain</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/btc.png" alt="BTC" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>BTC</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/exodus.png" alt="Exodus" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Exodus</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary subscribe-btn" onclick="subscribe('8months', 95000)">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1 Year Plan -->
+                <div class="plan-card">
+                    <div class="plan-header">
+                        <h3>1 Year Plan</h3>
+                        <div class="plan-price">₦130,000</div>
+                    </div>
+                    <div class="plan-content">
+                        <button class="btn btn-outline wallet-btn" onclick="showWallets('1year')">
+                            View Wallets Available
+                        </button>
+                        <div class="wallet-list" id="wallets-1year" style="display: none;">
+                            <div class="wallet-item">
+                                <img src="img/trustwallet.png" alt="Trust Wallet" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Trust Wallet</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/coinbase.png" alt="Coinbase" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Coinbase</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/atomic.png" alt="Atomic" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Atomic</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/binance.png" alt="Binance" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Binance</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/okx.png" alt="OKX" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>OKX</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/crypto.png" alt="Crypto.com" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Crypto.com</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/coinex.png" alt="CoinEx" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>CoinEx</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/blockchain.png" alt="Blockchain" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Blockchain</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/btc.png" alt="BTC" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>BTC</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/exodus.png" alt="Exodus" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Exodus</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/safepal.png" alt="SafePal" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>SafePal</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/tokenpocket.png" alt="Token Pocket" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>Token Pocket</span>
+                            </div>
+                            <div class="wallet-item">
+                                <img src="img/metamask.png" alt="MetaMask" onerror="this.src='/placeholder.svg?height=30&width=30'">
+                                <span>MetaMask</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary subscribe-btn" onclick="subscribe('1year', 130000)">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Input Modal -->
+    <div id="codeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Enter Subscription Code</h3>
+            <div class="subscription-code-container">
+                <div class="code-input-wrapper">
+                    <input type="text" id="subscriptionCode" placeholder="Enter your subscription code" required>
+                    <div class="code-input-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary activate-code-btn" onclick="activateCode()">
+                    <i class="fas fa-check-circle"></i> Activate Code
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <div class="message-content">
+                <h3 id="messageTitle"></h3>
+                <p id="messageText"></p>
+                <div class="countdown" id="countdown">5</div>
+                <button class="btn btn-primary" onclick="closeMessage()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Welcome Section Styling */
+        .welcome-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            min-width: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            color: white;
+            font-size: 1.5rem;
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .welcome-text h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+            word-break: break-word;
+        }
+        
+        .welcome-text p {
+            color: #a1a1aa;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Navigation Profile Image */
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Message Count Badge */
+        .message-count {
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Inbox Modal */
+        .inbox-modal {
+            max-width: 600px;
+            max-height: 80vh;
+        }
+
+        .messages-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message-item {
+            padding: 1rem;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .message-item:hover {
+            border-color: #2563eb;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .message-item.unread {
+            border-left: 4px solid #2563eb;
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-title {
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: #a1a1aa;
+        }
+
+        .message-preview {
+            color: #a1a1aa;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .copy-address-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-address-btn:hover {
+            background: #059669;
+        }
+
+        /* Subscription Code Input Styling */
+        .subscription-code-container {
+            padding: 20px;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .code-input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .code-input-wrapper input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            font-size: 18px;
+            background: #1e1e1e;
+            border: 2px solid #2563eb;
+            border-radius: 10px;
+            color: white;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .code-input-wrapper input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        }
+        
+        .code-input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2563eb;
+            font-size: 20px;
+        }
+        
+        .activate-code-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(45deg, #2563eb, #3b82f6);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .activate-code-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        /* Improved mobile responsiveness */
+        @media (max-width: 768px) {
+            .welcome-section {
+                flex-direction: row;
+                text-align: left;
+                gap: 0.8rem;
+                width: 100%;
+            }
+            
+            .welcome-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-grid {
+                gap: 1rem;
+            }
+            
+            .dashboard-card {
+                margin-bottom: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .welcome-text h1 {
+                font-size: 1.2rem;
+            }
+            
+            .welcome-text p {
+                font-size: 0.8rem;
+            }
+            
+            .profile-avatar {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .welcome-text h1 {
+                font-size: 1rem;
+            }
+            
+            .profile-avatar {
+                width: 35px;
+                height: 35px;
+                min-width: 35px;
+            }
+        }
+    </style>
+
+    <script src="js/script.js"></script>
+    <script src="js/dashboard.js"></script>
+    <!-- Begin of Chaport Live Chat code --> <script type="text/javascript"> (function(w,d,v3){ w.chaportConfig = { appId : '6849c71607cffc4798c7e969' };  if(w.chaport)return;v3=w.chaport={};v3._q=[];v3._l={};v3.q=function(){v3._q.push(arguments)};v3.on=function(e,fn){if(!v3._l[e])v3._l[e]=[];v3._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.com/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document); </script> <!-- End of Chaport Live Chat code -->
+</body>
+</html>

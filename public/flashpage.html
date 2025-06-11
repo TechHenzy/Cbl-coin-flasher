@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash Wallets - CBL COIN FLASHER</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>CBL COIN FLASHER</h2>
+            </div>
+            <div class="nav-menu">
+                <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Dashboard</button>
+                <button class="btn btn-outline" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <div class="dashboard-container">
+            <h1>Select Wallet To Flash</h1>
+            
+            <div id="walletGrid" class="wallet-grid">
+                <!-- Wallets will be populated based on subscription -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Flash Form Modal -->
+    <div id="flashModal" class="modal">
+        <div class="modal-content flash-modal">
+            <span class="close">&times;</span>
+            <div class="flash-header">
+                <div class="wallet-icon-large">
+                    <img id="selectedWalletImage" src="/placeholder.svg" alt="">
+                </div>
+                <h2 id="flashTitle">Flash via Wallet</h2>
+                <p>Flash Coins</p>
+            </div>
+            
+            <form id="flashForm" onsubmit="handleFlash(event)">
+                <div class="form-group">
+                    <label>Coin:</label>
+                    <select id="coinSelect" required>
+                        <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
+                        <option value="Ethereum (ETH)">Ethereum (ETH)</option>
+                        <option value="USDT">USDT</option>
+                        <option value="BNB">BNB</option>
+                        <option value="USDC">USDC</option>
+                        <option value="Dogecoin (DOGE)">Dogecoin (DOGE)</option>
+                        <option value="Cardano (ADA)">Cardano (ADA)</option>
+                        <option value="Solana (SOL)">Solana (SOL)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Quantity:</label>
+                    <input type="number" id="quantity" step="0.00000001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Currency:</label>
+                    <select id="currency" required>
+                        <option value="US Dollar (USD)">US Dollar (USD)</option>
+                        <option value="Nigerian Naira (NGN)">Nigerian Naira (NGN)</option>
+                        <option value="Euro (EUR)">Euro (EUR)</option>
+                        <option value="British Pound (GBP)">British Pound (GBP)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Amount:</label>
+                    <input type="number" id="amount" step="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Wallet Address:</label>
+                    <input type="text" id="walletAddress" placeholder="Enter recipient wallet address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Flash Type:</label>
+                    <select id="flashType" required>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary flash-btn">
+                    <i class="fas fa-bolt"></i> Flash
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .wallet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 2rem;
+            padding: 0 10px;
+        }
+
+        .wallet-card {
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1 / 1;
+        }
+
+        .wallet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .wallet-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .wallet-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .wallet-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .bulk-flashing {
+            background: #ff3a3a;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .wallet-tag {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* Wallet specific colors */
+        .wallet-coinbase { background: #0052FF; }
+        .wallet-trustwallet { background: #3375BB; }
+        .wallet-atomic { background: #00D4AA; }
+        .wallet-binance { background: #F3BA2F; }
+        .wallet-okx { background: #121212; }
+        .wallet-crypto { background: #103F68; }
+        .wallet-coinex { background: #0066CC; }
+        .wallet-blockchain { background: #121D33; }
+        .wallet-btc { background: #F7931A; }
+        .wallet-exodus { background: #2B6CB0; }
+        .wallet-safepal { background: #1890FF; }
+        .wallet-tokenpocket { background: #2980B9; }
+        .wallet-metamask { background: #F6851B; }
+        .wallet-cashapp { background: #00D632; }
+        .wallet-paypal { background: #003087; }
+        .wallet-luno { background: #1D57FF; }
+        .wallet-zelle { background: #6D1ED4; }
+        .wallet-bybit { background: #FFAD00; }
+
+        .flash-modal {
+            max-width: 500px;
+        }
+
+        .flash-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #374151;
+        }
+
+        .wallet-icon-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            overflow: hidden;
+        }
+
+        .wallet-icon-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .flash-header h2 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .flash-header p {
+            color: #a1a1aa;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .flash-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Tags */
+        .tag-hot {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .tag-trending {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+
+        .tag-new {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+        }
+
+        .tag-ai {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        @media (max-width: 768px) {
+            .wallet-grid {
+                grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+                gap: 12px;
+            }
+            
+            .wallet-logo {
+                width: 50px;
+                height: 50px;
+            }
+
+            .wallet-name {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wallet-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            
+            .wallet-logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .wallet-name {
+                font-size: 12px;
+            }
+        }
+    </style>
+
+    <script src="js/script.js"></script>
+    <script src="js/flashing.js"></script>
+</body>
+</html>
