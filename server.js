@@ -15,6 +15,7 @@ const USERS_FILE = path.join(__dirname, "data", "users.json")
 const AUTHS_FILE = path.join(__dirname, "data", "auths.json")
 const FLASH_REQUESTS_FILE = path.join(__dirname, "data", "flash-requests.json")
 const COIN_AVAILABILITY_FILE = path.join(__dirname, "data", "coin-availability.json")
+const COIN_NAMES_FILE = path.join(__dirname, "data", "coin-names.json")
 
 // Initialize data files if they don't exist
 async function initializeDataFiles() {
@@ -51,6 +52,14 @@ async function initializeDataFiles() {
         "Solana (SOL)": true,
       }
       await fs.writeFile(COIN_AVAILABILITY_FILE, JSON.stringify(initialCoinStatus, null, 2))
+    }
+
+    // Initialize coin-names.json
+    try {
+      await fs.access(COIN_NAMES_FILE)
+    } catch {
+      const initialCoinNames = {}
+      await fs.writeFile(COIN_NAMES_FILE, JSON.stringify(initialCoinNames, null, 2))
     }
 
     // Initialize auths.json with sample codes
@@ -178,13 +187,33 @@ app.post("/api/login", async (req, res) => {
   }
 })
 
-// Get coin availability
+// Get coin availability with custom names
 app.get("/api/coin-availability", async (req, res) => {
   try {
     const coinAvailability = await readJsonFile(COIN_AVAILABILITY_FILE)
-    res.json(coinAvailability)
+    const coinNames = await readJsonFile(COIN_NAMES_FILE)
+
+    // Create response with custom names
+    const response = {}
+    Object.keys(coinAvailability).forEach((originalName) => {
+      const customName = coinNames[originalName] || originalName
+      response[customName] = coinAvailability[originalName]
+    })
+
+    res.json(response)
   } catch (error) {
     console.error("Error fetching coin availability:", error)
+    res.json({})
+  }
+})
+
+// Get coin names mapping
+app.get("/api/coin-names", async (req, res) => {
+  try {
+    const coinNames = await readJsonFile(COIN_NAMES_FILE)
+    res.json(coinNames)
+  } catch (error) {
+    console.error("Error fetching coin names:", error)
     res.json({})
   }
 })
@@ -385,6 +414,37 @@ app.get("/api/admin/coin-availability", async (req, res) => {
   } catch (error) {
     console.error("Error fetching coin availability:", error)
     res.json({})
+  }
+})
+
+// Get coin names for admin
+app.get("/api/admin/coin-names", async (req, res) => {
+  try {
+    const coinNames = await readJsonFile(COIN_NAMES_FILE)
+    res.json(coinNames)
+  } catch (error) {
+    console.error("Error fetching coin names:", error)
+    res.json({})
+  }
+})
+
+// Update coin name
+app.post("/api/admin/update-coin-name", async (req, res) => {
+  try {
+    const { originalName, newName } = req.body
+
+    if (!originalName || !newName) {
+      return res.json({ success: false, message: "Original name and new name are required" })
+    }
+
+    const coinNames = await readJsonFile(COIN_NAMES_FILE)
+    coinNames[originalName] = newName
+
+    await writeJsonFile(COIN_NAMES_FILE, coinNames)
+    res.json({ success: true })
+  } catch (error) {
+    console.error("Error updating coin name:", error)
+    res.json({ success: false, message: "Failed to update coin name" })
   }
 })
 
