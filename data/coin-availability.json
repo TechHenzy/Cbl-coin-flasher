@@ -1,0 +1,10 @@
+{
+  "Bitcoin (BTC)": true,
+  "Ethereum (ETH)": true,
+  "USDT": false,
+  "BNB": false,
+  "USDC": true,
+  "Dogecoin (DOGE)": true,
+  "Cardano (ADA)": true,
+  "Solana (SOL)": false
+}

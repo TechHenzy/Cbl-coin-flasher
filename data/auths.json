@@ -1,0 +1,72 @@
+[
+  {
+    "code": "1M001CBL",
+    "plan": "1month",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "1M002CBL",
+    "plan": "1month",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "3M001CBL",
+    "plan": "3months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "3M002CBL",
+    "plan": "3months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "6M001CBL",
+    "plan": "6months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "6M002CBL",
+    "plan": "6months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "8M001CBL",
+    "plan": "8months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "8M002CBL",
+    "plan": "8months",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "1Y001CBL",
+    "plan": "1year",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  },
+  {
+    "code": "1Y002CBL",
+    "plan": "1year",
+    "status": "available",
+    "usedBy": null,
+    "dateUsed": null
+  }
+]
