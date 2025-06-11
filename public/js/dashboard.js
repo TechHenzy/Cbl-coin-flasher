@@ -271,6 +271,17 @@ function showSubscriptionModal() {
   document.getElementById("subscriptionModal").style.display = "block"
 }
 
+// NEW FUNCTION: Show Load Code Modal directly
+function showLoadCodeModal() {
+  document.getElementById("codeModal").style.display = "block"
+  // Clear any previous code input
+  document.getElementById("subscriptionCode").value = ""
+  // Focus on the input field for better UX
+  setTimeout(() => {
+    document.getElementById("subscriptionCode").focus()
+  }, 100)
+}
+
 function showWallets(plan) {
   const walletList = document.getElementById(`wallets-${plan}`)
   if (walletList.style.display === "none") {
