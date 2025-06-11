@@ -79,7 +79,12 @@
                 <h2>Coin Availability Management</h2>
                 <div class="coins-grid">
                     <div class="coin-card">
-                        <h3>Bitcoin (BTC)</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-Bitcoin (BTC)">Bitcoin (BTC)</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('Bitcoin (BTC)')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('Bitcoin (BTC)', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('Bitcoin (BTC)', false)">Unavailable</button>
@@ -87,7 +92,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>Ethereum (ETH)</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-Ethereum (ETH)">Ethereum (ETH)</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('Ethereum (ETH)')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('Ethereum (ETH)', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('Ethereum (ETH)', false)">Unavailable</button>
@@ -95,7 +105,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>USDT</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-USDT">USDT</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('USDT')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('USDT', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('USDT', false)">Unavailable</button>
@@ -103,7 +118,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>BNB</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-BNB">BNB</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('BNB')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('BNB', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('BNB', false)">Unavailable</button>
@@ -111,7 +131,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>USDC</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-USDC">USDC</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('USDC')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('USDC', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('USDC', false)">Unavailable</button>
@@ -119,7 +144,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>Dogecoin (DOGE)</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-Dogecoin (DOGE)">Dogecoin (DOGE)</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('Dogecoin (DOGE)')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('Dogecoin (DOGE)', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('Dogecoin (DOGE)', false)">Unavailable</button>
@@ -127,7 +157,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>Cardano (ADA)</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-Cardano (ADA)">Cardano (ADA)</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('Cardano (ADA)')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('Cardano (ADA)', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('Cardano (ADA)', false)">Unavailable</button>
@@ -135,7 +170,12 @@
                     </div>
                     
                     <div class="coin-card">
-                        <h3>Solana (SOL)</h3>
+                        <div class="coin-header">
+                            <h3 id="coin-Solana (SOL)">Solana (SOL)</h3>
+                            <button class="edit-coin-btn" onclick="editCoinName('Solana (SOL)')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                         <div class="coin-status">
                             <button class="status-btn available active" onclick="setCoinStatus('Solana (SOL)', true)">Available</button>
                             <button class="status-btn unavailable" onclick="setCoinStatus('Solana (SOL)', false)">Unavailable</button>
@@ -197,6 +237,32 @@
         </div>
     </div>
 
+    <!-- Edit Coin Name Modal -->
+    <div id="editCoinModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCoinModal()">&times;</span>
+            <h3>Edit Coin Name</h3>
+            <div class="edit-coin-form">
+                <div class="form-group">
+                    <label>Current Name:</label>
+                    <input type="text" id="currentCoinName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>New Name:</label>
+                    <input type="text" id="newCoinName" placeholder="Enter new coin name" required>
+                </div>
+                <div class="form-actions">
+                    <button class="btn btn-primary" onclick="saveCoinName()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-outline" onclick="closeEditCoinModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         /* Coin Management Styles */
         .coins-grid {
@@ -214,10 +280,38 @@
             text-align: center;
         }
 
+        .coin-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
         .coin-card h3 {
             color: #2563eb;
-            margin-bottom: 1rem;
             font-size: 1.2rem;
+            margin: 0;
+            flex: 1;
+        }
+
+        .edit-coin-btn {
+            background: #374151;
+            color: #60a5fa;
+            border: 1px solid #60a5fa;
+            border-radius: 6px;
+            padding: 6px 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
+
+        .edit-coin-btn:hover {
+            background: #60a5fa;
+            color: white;
+            transform: scale(1.05);
         }
 
         .coin-status {
@@ -261,6 +355,57 @@
         .status-btn:hover {
             transform: translateY(-1px);
         }
+
+        /* Edit Coin Modal Styles */
+        .edit-coin-form {
+            padding: 1rem 0;
+        }
+
+        .edit-coin-form .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .edit-coin-form label {
+            display: block;
+            color: #e5e7eb;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .edit-coin-form input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(55, 65, 81, 0.5);
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-coin-form input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .edit-coin-form input[readonly] {
+            background: rgba(55, 65, 81, 0.3);
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .form-actions .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
     /* Existing styles... */
     
     /* Copy button styles */
@@ -374,6 +519,23 @@
     .wallet-address:hover {
         color: #60a5fa;
         text-decoration: underline;
+    }
+
+    /* Mobile responsiveness for coin cards */
+    @media (max-width: 768px) {
+        .coins-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .coin-header {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .edit-coin-btn {
+            align-self: center;
+        }
     }
     </style>
 
