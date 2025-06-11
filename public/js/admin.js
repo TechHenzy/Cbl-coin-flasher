@@ -1,5 +1,6 @@
 // Admin panel functionality
 let isLoggedIn = false
+let currentEditingCoin = null
 
 document.addEventListener("DOMContentLoaded", () => {
   checkAdminAuth()
@@ -36,6 +37,7 @@ function loadAdminData() {
   loadFlashRequests()
   loadCoinAvailability()
   loadAuthCodes()
+  loadCoinNames()
 }
 
 function showTab(tabName) {
@@ -63,6 +65,7 @@ function showTab(tabName) {
       break
     case "coins":
       loadCoinAvailability()
+      loadCoinNames()
       break
     case "codes":
       loadAuthCodes()
@@ -257,12 +260,32 @@ function loadCoinAvailability() {
     .catch((error) => console.error("Error loading coin availability:", error))
 }
 
+function loadCoinNames() {
+  fetch("/api/admin/coin-names")
+    .then((response) => response.json())
+    .then((coinNames) => {
+      // Update coin names in the UI
+      Object.keys(coinNames).forEach((originalName) => {
+        const customName = coinNames[originalName]
+        const coinElement = document.getElementById(`coin-${originalName}`)
+        if (coinElement && customName) {
+          coinElement.textContent = customName
+        }
+      })
+    })
+    .catch((error) => console.error("Error loading coin names:", error))
+}
+
 function updateCoinStatusButtons(coin, isAvailable) {
   const coinCards = document.querySelectorAll(".coin-card")
 
   coinCards.forEach((card) => {
-    const coinName = card.querySelector("h3").textContent
-    if (coinName === coin) {
+    const coinNameElement = card.querySelector("h3")
+    const coinName = coinNameElement.textContent
+
+    // Check both original name and custom name
+    const coinId = coinNameElement.id.replace("coin-", "")
+    if (coinName === coin || coinId === coin) {
       const availableBtn = card.querySelector(".status-btn.available")
       const unavailableBtn = card.querySelector(".status-btn.unavailable")
 
@@ -289,14 +312,75 @@ function setCoinStatus(coin, isAvailable) {
     .then((data) => {
       if (data.success) {
         updateCoinStatusButtons(coin, isAvailable)
-        alert(`${coin} status updated to ${isAvailable ? "Available" : "Unavailable"}`)
+        showNotification(`${coin} status updated to ${isAvailable ? "Available" : "Unavailable"}`, "success")
       } else {
-        alert("Error updating coin status")
+        showNotification("Error updating coin status", "error")
       }
     })
     .catch((error) => {
       console.error("Error:", error)
-      alert("Error updating coin status")
+      showNotification("Error updating coin status", "error")
+    })
+}
+
+// Coin name editing functions
+function editCoinName(originalName) {
+  currentEditingCoin = originalName
+  const coinElement = document.getElementById(`coin-${originalName}`)
+  const currentDisplayName = coinElement.textContent
+
+  document.getElementById("currentCoinName").value = currentDisplayName
+  document.getElementById("newCoinName").value = currentDisplayName
+  document.getElementById("editCoinModal").style.display = "block"
+}
+
+function closeEditCoinModal() {
+  document.getElementById("editCoinModal").style.display = "none"
+  currentEditingCoin = null
+  document.getElementById("newCoinName").value = ""
+}
+
+function saveCoinName() {
+  const newName = document.getElementById("newCoinName").value.trim()
+
+  if (!newName) {
+    showNotification("Please enter a valid coin name", "error")
+    return
+  }
+
+  if (!currentEditingCoin) {
+    showNotification("No coin selected for editing", "error")
+    return
+  }
+
+  fetch("/api/admin/update-coin-name", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      originalName: currentEditingCoin,
+      newName: newName,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Update the coin name in the UI
+        const coinElement = document.getElementById(`coin-${currentEditingCoin}`)
+        if (coinElement) {
+          coinElement.textContent = newName
+        }
+
+        showNotification(`Coin name updated successfully to "${newName}"`, "success")
+        closeEditCoinModal()
+      } else {
+        showNotification("Error updating coin name", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      showNotification("Error updating coin name", "error")
     })
 }
 
@@ -342,15 +426,15 @@ function deleteUser(username) {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          alert("User deleted successfully")
+          showNotification("User deleted successfully", "success")
           loadUsers()
         } else {
-          alert("Error deleting user")
+          showNotification("Error deleting user", "error")
         }
       })
       .catch((error) => {
         console.error("Error:", error)
-        alert("Error deleting user")
+        showNotification("Error deleting user", "error")
       })
   }
 }
@@ -366,15 +450,15 @@ function markAsDone(flashId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        alert("Flash request marked as done")
+        showNotification("Flash request marked as done", "success")
         loadFlashRequests()
       } else {
-        alert("Error marking flash request as done")
+        showNotification("Error marking flash request as done", "error")
       }
     })
     .catch((error) => {
       console.error("Error:", error)
-      alert("Error marking flash request as done")
+      showNotification("Error marking flash request as done", "error")
     })
 }
 
@@ -389,15 +473,15 @@ function markAsFailed(flashId) {
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        alert("Flash request marked as failed")
+        showNotification("Flash request marked as failed", "success")
         loadFlashRequests()
       } else {
-        alert("Error marking flash request as failed")
+        showNotification("Error marking flash request as failed", "error")
       }
     })
     .catch((error) => {
       console.error("Error:", error)
-      alert("Error marking flash request as failed")
+      showNotification("Error marking flash request as failed", "error")
     })
 }
 
@@ -414,15 +498,15 @@ function generateCodes() {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          alert(`Generated ${data.generated} new codes`)
+          showNotification(`Generated ${data.generated} new codes`, "success")
           loadAuthCodes()
         } else {
-          alert("Error generating codes")
+          showNotification("Error generating codes", "error")
         }
       })
       .catch((error) => {
         console.error("Error:", error)
-        alert("Error generating codes")
+        showNotification("Error generating codes", "error")
       })
   }
 }
@@ -442,11 +526,19 @@ function exportCodes() {
     })
     .catch((error) => {
       console.error("Error:", error)
-      alert("Error exporting codes")
+      showNotification("Error exporting codes", "error")
     })
 }
 
 function logout() {
   localStorage.removeItem("adminAuth")
   window.location.reload()
+}
+
+// Close modal when clicking outside
+window.onclick = (event) => {
+  const editModal = document.getElementById("editCoinModal")
+  if (event.target === editModal) {
+    closeEditCoinModal()
+  }
 }

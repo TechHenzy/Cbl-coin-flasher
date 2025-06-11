@@ -68,45 +68,84 @@ function updateCoinSelect() {
   const coinSelect = document.getElementById("coinSelect")
   if (!coinSelect) return
 
-  const coins = [
-    { value: "Bitcoin (BTC)", label: "Bitcoin (BTC)" },
-    { value: "Ethereum (ETH)", label: "Ethereum (ETH)" },
-    { value: "USDT", label: "USDT" },
-    { value: "BNB", label: "BNB" },
-    { value: "USDC", label: "USDC" },
-    { value: "Dogecoin (DOGE)", label: "Dogecoin (DOGE)" },
-    { value: "Cardano (ADA)", label: "Cardano (ADA)" },
-    { value: "Solana (SOL)", label: "Solana (SOL)" },
-  ]
+  // Fetch coin names to get custom names
+  fetch("/api/coin-names")
+    .then((response) => response.json())
+    .then((coinNames) => {
+      const defaultCoins = [
+        { original: "Bitcoin (BTC)", label: "Bitcoin (BTC)" },
+        { original: "Ethereum (ETH)", label: "Ethereum (ETH)" },
+        { original: "USDT", label: "USDT" },
+        { original: "BNB", label: "BNB" },
+        { original: "USDC", label: "USDC" },
+        { original: "Dogecoin (DOGE)", label: "Dogecoin (DOGE)" },
+        { original: "Cardano (ADA)", label: "Cardano (ADA)" },
+        { original: "Solana (SOL)", label: "Solana (SOL)" },
+      ]
 
-  coinSelect.innerHTML = ""
+      coinSelect.innerHTML = ""
 
-  coins.forEach((coin) => {
-    const option = document.createElement("option")
-    option.value = coin.value
+      defaultCoins.forEach((coin) => {
+        const option = document.createElement("option")
+        const customName = coinNames[coin.original] || coin.label
+        option.value = customName
+        option.setAttribute("data-original", coin.original)
 
-    const isAvailable = window.coinAvailability[coin.value] !== false
-    if (isAvailable) {
-      option.textContent = coin.label
-    } else {
-      option.textContent = `${coin.label} (Currently Unavailable)`
-      option.disabled = true
-      option.style.color = "#ef4444"
-    }
+        const isAvailable = window.coinAvailability[customName] !== false
+        if (isAvailable) {
+          option.textContent = customName
+        } else {
+          option.textContent = `${customName} (Currently Unavailable)`
+          option.disabled = true
+          option.style.color = "#ef4444"
+        }
 
-    coinSelect.appendChild(option)
-  })
+        coinSelect.appendChild(option)
+      })
 
-  // Add change event listener to prevent selection of unavailable coins
-  coinSelect.addEventListener("change", (e) => {
-    const selectedCoin = e.target.value
-    const isAvailable = window.coinAvailability[selectedCoin] !== false
+      // Add change event listener to prevent selection of unavailable coins
+      coinSelect.addEventListener("change", (e) => {
+        const selectedCoin = e.target.value
+        const isAvailable = window.coinAvailability[selectedCoin] !== false
 
-    if (!isAvailable) {
-      alert("Cannot select a coin that isn't available right now")
-      e.target.selectedIndex = 0
-    }
-  })
+        if (!isAvailable) {
+          alert("Cannot select a coin that isn't available right now")
+          e.target.selectedIndex = 0
+        }
+      })
+    })
+    .catch((error) => {
+      console.error("Error loading coin names:", error)
+      // Fallback to default coins
+      const coins = [
+        { value: "Bitcoin (BTC)", label: "Bitcoin (BTC)" },
+        { value: "Ethereum (ETH)", label: "Ethereum (ETH)" },
+        { value: "USDT", label: "USDT" },
+        { value: "BNB", label: "BNB" },
+        { value: "USDC", label: "USDC" },
+        { value: "Dogecoin (DOGE)", label: "Dogecoin (DOGE)" },
+        { value: "Cardano (ADA)", label: "Cardano (ADA)" },
+        { value: "Solana (SOL)", label: "Solana (SOL)" },
+      ]
+
+      coinSelect.innerHTML = ""
+
+      coins.forEach((coin) => {
+        const option = document.createElement("option")
+        option.value = coin.value
+
+        const isAvailable = window.coinAvailability[coin.value] !== false
+        if (isAvailable) {
+          option.textContent = coin.label
+        } else {
+          option.textContent = `${coin.label} (Currently Unavailable)`
+          option.disabled = true
+          option.style.color = "#ef4444"
+        }
+
+        coinSelect.appendChild(option)
+      })
+    })
 }
 
 function getWalletsForPlan(plan) {
