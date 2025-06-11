@@ -75,7 +75,14 @@
                     </div>
                     <div class="card-content">
                         <p>Choose your subscription plan to access wallet flashing features</p>
-                        <button class="btn btn-primary" onclick="showSubscriptionModal()">View Plans</button>
+                        <div class="subscription-buttons">
+                            <button class="btn btn-primary" onclick="showSubscriptionModal()">
+                                <i class="fas fa-eye"></i> View Plans
+                            </button>
+                            <button class="btn btn-outline load-code-btn" onclick="showLoadCodeModal()">
+                                <i class="fas fa-key"></i> Load Code
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -383,7 +390,8 @@
     <div id="codeModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h3>Enter Subscription Code</h3>
+            <h3><i class="fas fa-key"></i> Enter Subscription Code</h3>
+            <p class="code-modal-description">Already have a subscription code? Enter it below to activate your plan instantly.</p>
             <div class="subscription-code-container">
                 <div class="code-input-wrapper">
                     <input type="text" id="subscriptionCode" placeholder="Enter your subscription code" required>
@@ -469,6 +477,36 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        /* Subscription Buttons */
+        .subscription-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+
+        .load-code-btn {
+            background: transparent;
+            color: #10b981;
+            border: 1px solid #10b981;
+            transition: all 0.3s ease;
+        }
+
+        .load-code-btn:hover {
+            background: #10b981;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Code Modal Description */
+        .code-modal-description {
+            color: #a1a1aa;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
         /* Message Count Badge */
@@ -631,6 +669,11 @@
             .dashboard-card {
                 margin-bottom: 0;
             }
+
+            .subscription-buttons {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -646,6 +689,15 @@
                 width: 40px;
                 height: 40px;
                 min-width: 40px;
+            }
+
+            .subscription-buttons {
+                gap: 0.5rem;
+            }
+
+            .load-code-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
             }
         }
         
@@ -664,6 +716,5 @@
 
     <script src="js/script.js"></script>
     <script src="js/dashboard.js"></script>
-    <!-- Begin of Chaport Live Chat code --> <script type="text/javascript"> (function(w,d,v3){ w.chaportConfig = { appId : '6849c71607cffc4798c7e969' };  if(w.chaport)return;v3=w.chaport={};v3._q=[];v3._l={};v3.q=function(){v3._q.push(arguments)};v3.on=function(e,fn){if(!v3._l[e])v3._l[e]=[];v3._l[e].push(fn)};var s=d.createElement('script');s.type='text/javascript';s.async=true;s.src='https://app.chaport.com/javascripts/insert.js';var ss=d.getElementsByTagName('script')[0];ss.parentNode.insertBefore(s,ss)})(window, document); </script> <!-- End of Chaport Live Chat code -->
 </body>
 </html>
