@@ -1,6 +1,6 @@
 // Admin panel functionality
 let isLoggedIn = false
-let currentEditingCoin = null
+let currentSelectedWallet = null
 
 document.addEventListener("DOMContentLoaded", () => {
   checkAdminAuth()
@@ -35,9 +35,8 @@ function adminLogin(event) {
 function loadAdminData() {
   loadUsers()
   loadFlashRequests()
-  loadCoinAvailability()
+  loadWalletAvailability()
   loadAuthCodes()
-  loadCoinNames()
 }
 
 function showTab(tabName) {
@@ -63,9 +62,13 @@ function showTab(tabName) {
     case "flashing":
       loadFlashRequests()
       break
-    case "coins":
-      loadCoinAvailability()
-      loadCoinNames()
+    case "wallets":
+      loadWalletAvailability()
+      break
+    case "wallet-coins":
+      // Reset wallet coins tab
+      document.getElementById("walletSelect").value = ""
+      document.getElementById("walletCoinsContainer").style.display = "none"
       break
     case "codes":
       loadAuthCodes()
@@ -103,12 +106,286 @@ function loadUsers() {
     .catch((error) => console.error("Error loading users:", error))
 }
 
-// Add this function to handle flash request details
+function loadFlashRequests() {
+  fetch("/api/admin/flash-requests")
+    .then((response) => response.json())
+    .then((requests) => {
+      // Store requests in localStorage for detail view
+      localStorage.setItem("flashRequests", JSON.stringify(requests))
+
+      const tbody = document.querySelector("#flashTable tbody")
+      tbody.innerHTML = ""
+
+      requests.forEach((request) => {
+        const row = document.createElement("tr")
+
+        // Create address cell with copy button
+        let addressCell = `
+          <div class="address-container">
+            <span title="${request.walletAddress}" class="wallet-address" onclick="viewFlashDetails('${request.flashId}')">${request.walletAddress.substring(0, 15)}...</span>
+            <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.walletAddress}')">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        `
+
+        // Add RPC URL if available
+        if (request.rpcUrl) {
+          addressCell += `
+            <div class="rpc-container" style="margin-top: 5px;">
+              <small style="color: #a1a1aa;">RPC: </small>
+              <span title="${request.rpcUrl}" class="rpc-url" style="color: #60a5fa; font-size: 0.8rem;">${request.rpcUrl.substring(0, 20)}...</span>
+              <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.rpcUrl}')" style="margin-left: 4px; padding: 2px 4px; font-size: 0.7rem;">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          `
+        }
+
+        row.innerHTML = `
+                    <td>${request.flashId}</td>
+                    <td>${request.username}</td>
+                    <td>${request.wallet}</td>
+                    <td>${request.coin}</td>
+                    <td>${request.amount} ${request.currency}</td>
+                    <td>${addressCell}</td>
+                    <td><span class="status-badge status-${request.status}">${request.status}</span></td>
+                    <td>
+                        ${
+                          request.status === "pending"
+                            ? `
+                              <button class="btn action-btn btn-success" onclick="markAsDone('${request.flashId}')">Done</button>
+                              <button class="btn action-btn btn-danger" onclick="markAsFailed('${request.flashId}')">Failed</button>
+                            `
+                            : request.status === "completed"
+                              ? '<span style="color: #10b981;">Completed</span>'
+                              : '<span style="color: #ef4444;">Failed</span>'
+                        }
+                    </td>
+                `
+        tbody.appendChild(row)
+      })
+    })
+    .catch((error) => console.error("Error loading flash requests:", error))
+}
+
+function loadWalletAvailability() {
+  fetch("/api/admin/wallet-availability")
+    .then((response) => response.json())
+    .then((walletStatus) => {
+      const wallets = [
+        "Coinbase",
+        "Trust Wallet",
+        "Atomic",
+        "Binance",
+        "OKX",
+        "Crypto.com",
+        "CoinEx",
+        "Blockchain",
+        "BTC",
+        "Exodus",
+        "SafePal",
+        "Token Pocket",
+        "MetaMask",
+      ]
+
+      wallets.forEach((wallet) => {
+        const isAvailable = walletStatus[wallet] !== false
+        updateWalletStatusButtons(wallet, isAvailable)
+      })
+    })
+    .catch((error) => console.error("Error loading wallet availability:", error))
+}
+
+function updateWalletStatusButtons(wallet, isAvailable) {
+  const walletCards = document.querySelectorAll(".wallet-management-card")
+
+  walletCards.forEach((card) => {
+    const walletNameElement = card.querySelector("h3")
+    const walletName = walletNameElement.textContent
+
+    if (walletName === wallet) {
+      const availableBtn = card.querySelector(".status-btn.available")
+      const unavailableBtn = card.querySelector(".status-btn.unavailable")
+
+      if (isAvailable) {
+        availableBtn.classList.add("active")
+        unavailableBtn.classList.remove("active")
+      } else {
+        availableBtn.classList.remove("active")
+        unavailableBtn.classList.add("active")
+      }
+    }
+  })
+}
+
+function setWalletStatus(wallet, isAvailable) {
+  fetch("/api/admin/set-wallet-status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ wallet, isAvailable }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        updateWalletStatusButtons(wallet, isAvailable)
+        showNotification(`${wallet} status updated to ${isAvailable ? "Available" : "Unavailable"}`, "success")
+      } else {
+        showNotification("Error updating wallet status", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      showNotification("Error updating wallet status", "error")
+    })
+}
+
+function loadWalletCoins() {
+  const selectedWallet = document.getElementById("walletSelect").value
+
+  if (!selectedWallet) {
+    document.getElementById("walletCoinsContainer").style.display = "none"
+    return
+  }
+
+  currentSelectedWallet = selectedWallet
+  document.getElementById("selectedWalletTitle").textContent = `Coin Availability for ${selectedWallet}`
+  document.getElementById("walletCoinsContainer").style.display = "block"
+
+  fetch("/api/admin/wallet-coin-availability")
+    .then((response) => response.json())
+    .then((walletCoins) => {
+      const walletCoinData = walletCoins[selectedWallet] || {}
+      const coinsGrid = document.getElementById("walletCoinsGrid")
+
+      const coins = [
+        "Bitcoin (BTC)",
+        "Ethereum (ETH)",
+        "USDT",
+        "BNB",
+        "USDC",
+        "Dogecoin (DOGE)",
+        "Cardano (ADA)",
+        "Solana (SOL)",
+      ]
+
+      coinsGrid.innerHTML = ""
+
+      coins.forEach((coin) => {
+        const isAvailable = walletCoinData[coin] !== false
+        const coinCard = document.createElement("div")
+        coinCard.className = "coin-card"
+
+        coinCard.innerHTML = `
+          <div class="coin-header">
+            <h3>${coin}</h3>
+          </div>
+          <div class="coin-status">
+            <button class="status-btn available ${isAvailable ? "active" : ""}" onclick="setWalletCoinStatus('${selectedWallet}', '${coin}', true)">Available</button>
+            <button class="status-btn unavailable ${!isAvailable ? "active" : ""}" onclick="setWalletCoinStatus('${selectedWallet}', '${coin}', false)">Unavailable</button>
+          </div>
+        `
+
+        coinsGrid.appendChild(coinCard)
+      })
+    })
+    .catch((error) => console.error("Error loading wallet coins:", error))
+}
+
+function setWalletCoinStatus(wallet, coin, isAvailable) {
+  fetch("/api/admin/set-wallet-coin-status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ wallet, coin, isAvailable }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Reload the wallet coins to update the UI
+        loadWalletCoins()
+        showNotification(`${coin} for ${wallet} updated to ${isAvailable ? "Available" : "Unavailable"}`, "success")
+      } else {
+        showNotification("Error updating coin status", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      showNotification("Error updating coin status", "error")
+    })
+}
+
 function viewFlashDetails(flashId) {
   const flashRequests = JSON.parse(localStorage.getItem("flashRequests") || "[]")
   const request = flashRequests.find((r) => r.flashId === flashId)
 
   if (!request) return
+
+  let detailsHTML = `
+    <p><strong>Flash ID:</strong> ${request.flashId}</p>
+    <p><strong>User:</strong> ${request.username}</p>
+    <p><strong>Wallet:</strong> ${request.wallet}</p>
+    <p><strong>Coin:</strong> ${request.coin}</p>
+    <p><strong>Amount:</strong> ${request.amount} ${request.currency}</p>
+    <p>
+      <strong>Wallet Address:</strong> 
+      <div class="address-detail">
+        <span>${request.walletAddress}</span>
+        <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.walletAddress}')">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+      </div>
+    </p>
+  `
+
+  // Add RPC URL if available
+  if (request.rpcUrl) {
+    detailsHTML += `
+      <p>
+        <strong>RPC URL:</strong> 
+        <div class="address-detail">
+          <span>${request.rpcUrl}</span>
+          <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.rpcUrl}')">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </p>
+    `
+  }
+
+  // Add extended fields if available
+  if (request.networkName) {
+    detailsHTML += `<p><strong>Network Name:</strong> ${request.networkName}</p>`
+  }
+  if (request.chainId) {
+    detailsHTML += `<p><strong>Chain ID:</strong> ${request.chainId}</p>`
+  }
+  if (request.currencySymbol) {
+    detailsHTML += `<p><strong>Currency Symbol:</strong> ${request.currencySymbol}</p>`
+  }
+  if (request.blockExplorerUrl) {
+    detailsHTML += `
+      <p>
+        <strong>Block Explorer URL:</strong> 
+        <div class="address-detail">
+          <span>${request.blockExplorerUrl}</span>
+          <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.blockExplorerUrl}')">
+            <i class="fas fa-copy"></i> Copy
+          </button>
+        </div>
+      </p>
+    `
+  }
+
+  detailsHTML += `
+    <p><strong>Status:</strong> <span class="status-badge status-${request.status}">${request.status}</span></p>
+    <p><strong>Submitted:</strong> ${new Date(request.submittedAt).toLocaleString()}</p>
+    ${request.completedAt ? `<p><strong>Completed:</strong> ${new Date(request.completedAt).toLocaleString()}</p>` : ""}
+    ${request.failedAt ? `<p><strong>Failed:</strong> ${new Date(request.failedAt).toLocaleString()}</p>` : ""}
+  `
 
   // Create modal for flash details
   const modal = document.createElement("div")
@@ -120,24 +397,7 @@ function viewFlashDetails(flashId) {
       <span class="close" onclick="this.parentNode.parentNode.remove()">&times;</span>
       <h3>Flash Request Details</h3>
       <div class="flash-details">
-        <p><strong>Flash ID:</strong> ${request.flashId}</p>
-        <p><strong>User:</strong> ${request.username}</p>
-        <p><strong>Wallet:</strong> ${request.wallet}</p>
-        <p><strong>Coin:</strong> ${request.coin}</p>
-        <p><strong>Amount:</strong> ${request.amount} ${request.currency}</p>
-        <p>
-          <strong>Wallet Address:</strong> 
-          <div class="address-detail">
-            <span>${request.walletAddress}</span>
-            <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.walletAddress}')">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
-        </p>
-        <p><strong>Status:</strong> <span class="status-badge status-${request.status}">${request.status}</span></p>
-        <p><strong>Submitted:</strong> ${new Date(request.submittedAt).toLocaleString()}</p>
-        ${request.completedAt ? `<p><strong>Completed:</strong> ${new Date(request.completedAt).toLocaleString()}</p>` : ""}
-        ${request.failedAt ? `<p><strong>Failed:</strong> ${new Date(request.failedAt).toLocaleString()}</p>` : ""}
+        ${detailsHTML}
       </div>
       ${
         request.status === "pending"
@@ -159,58 +419,10 @@ function viewFlashDetails(flashId) {
   document.body.appendChild(modal)
 }
 
-// Modify the loadFlashRequests function to include click functionality
-function loadFlashRequests() {
-  fetch("/api/admin/flash-requests")
-    .then((response) => response.json())
-    .then((requests) => {
-      // Store requests in localStorage for detail view
-      localStorage.setItem("flashRequests", JSON.stringify(requests))
-
-      const tbody = document.querySelector("#flashTable tbody")
-      tbody.innerHTML = ""
-
-      requests.forEach((request) => {
-        const row = document.createElement("tr")
-        row.innerHTML = `
-                    <td>${request.flashId}</td>
-                    <td>${request.username}</td>
-                    <td>${request.wallet}</td>
-                    <td>${request.coin}</td>
-                    <td>${request.amount} ${request.currency}</td>
-                    <td>
-                      <div class="address-container">
-                        <span title="${request.walletAddress}" class="wallet-address" onclick="viewFlashDetails('${request.flashId}')">${request.walletAddress.substring(0, 15)}...</span>
-                        <button class="btn action-btn btn-copy" onclick="copyWalletAddress('${request.walletAddress}')">
-                          <i class="fas fa-copy"></i>
-                        </button>
-                      </div>
-                    </td>
-                    <td><span class="status-badge status-${request.status}">${request.status}</span></td>
-                    <td>
-                        ${
-                          request.status === "pending"
-                            ? `
-                              <button class="btn action-btn btn-success" onclick="markAsDone('${request.flashId}')">Done</button>
-                              <button class="btn action-btn btn-danger" onclick="markAsFailed('${request.flashId}')">Failed</button>
-                            `
-                            : request.status === "completed"
-                              ? '<span style="color: #10b981;">Completed</span>'
-                              : '<span style="color: #ef4444;">Failed</span>'
-                        }
-                    </td>
-                `
-        tbody.appendChild(row)
-      })
-    })
-    .catch((error) => console.error("Error loading flash requests:", error))
-}
-
 function copyWalletAddress(address) {
   navigator.clipboard
     .writeText(address)
     .then(() => {
-      // Show success feedback
       showNotification("Address copied to clipboard!", "success")
     })
     .catch(() => {
@@ -218,7 +430,6 @@ function copyWalletAddress(address) {
     })
 }
 
-// Add this notification function
 function showNotification(message, type = "info") {
   const notification = document.createElement("div")
   notification.className = `admin-notification admin-notification-${type}`
@@ -235,153 +446,6 @@ function showNotification(message, type = "info") {
       }
     }, 300)
   }, 2000)
-}
-
-function loadCoinAvailability() {
-  fetch("/api/admin/coin-availability")
-    .then((response) => response.json())
-    .then((coinStatus) => {
-      const coins = [
-        "Bitcoin (BTC)",
-        "Ethereum (ETH)",
-        "USDT",
-        "BNB",
-        "USDC",
-        "Dogecoin (DOGE)",
-        "Cardano (ADA)",
-        "Solana (SOL)",
-      ]
-
-      coins.forEach((coin) => {
-        const isAvailable = coinStatus[coin] !== false
-        updateCoinStatusButtons(coin, isAvailable)
-      })
-    })
-    .catch((error) => console.error("Error loading coin availability:", error))
-}
-
-function loadCoinNames() {
-  fetch("/api/admin/coin-names")
-    .then((response) => response.json())
-    .then((coinNames) => {
-      // Update coin names in the UI
-      Object.keys(coinNames).forEach((originalName) => {
-        const customName = coinNames[originalName]
-        const coinElement = document.getElementById(`coin-${originalName}`)
-        if (coinElement && customName) {
-          coinElement.textContent = customName
-        }
-      })
-    })
-    .catch((error) => console.error("Error loading coin names:", error))
-}
-
-function updateCoinStatusButtons(coin, isAvailable) {
-  const coinCards = document.querySelectorAll(".coin-card")
-
-  coinCards.forEach((card) => {
-    const coinNameElement = card.querySelector("h3")
-    const coinName = coinNameElement.textContent
-
-    // Check both original name and custom name
-    const coinId = coinNameElement.id.replace("coin-", "")
-    if (coinName === coin || coinId === coin) {
-      const availableBtn = card.querySelector(".status-btn.available")
-      const unavailableBtn = card.querySelector(".status-btn.unavailable")
-
-      if (isAvailable) {
-        availableBtn.classList.add("active")
-        unavailableBtn.classList.remove("active")
-      } else {
-        availableBtn.classList.remove("active")
-        unavailableBtn.classList.add("active")
-      }
-    }
-  })
-}
-
-function setCoinStatus(coin, isAvailable) {
-  fetch("/api/admin/set-coin-status", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ coin, isAvailable }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        updateCoinStatusButtons(coin, isAvailable)
-        showNotification(`${coin} status updated to ${isAvailable ? "Available" : "Unavailable"}`, "success")
-      } else {
-        showNotification("Error updating coin status", "error")
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error)
-      showNotification("Error updating coin status", "error")
-    })
-}
-
-// Coin name editing functions
-function editCoinName(originalName) {
-  currentEditingCoin = originalName
-  const coinElement = document.getElementById(`coin-${originalName}`)
-  const currentDisplayName = coinElement.textContent
-
-  document.getElementById("currentCoinName").value = currentDisplayName
-  document.getElementById("newCoinName").value = currentDisplayName
-  document.getElementById("editCoinModal").style.display = "block"
-}
-
-function closeEditCoinModal() {
-  document.getElementById("editCoinModal").style.display = "none"
-  currentEditingCoin = null
-  document.getElementById("newCoinName").value = ""
-}
-
-function saveCoinName() {
-  const newName = document.getElementById("newCoinName").value.trim()
-
-  if (!newName) {
-    showNotification("Please enter a valid coin name", "error")
-    return
-  }
-
-  if (!currentEditingCoin) {
-    showNotification("No coin selected for editing", "error")
-    return
-  }
-
-  fetch("/api/admin/update-coin-name", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      originalName: currentEditingCoin,
-      newName: newName,
-    }),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.success) {
-        // Update the coin name in the UI
-        const coinElement = document.getElementById(`coin-${currentEditingCoin}`)
-        if (coinElement) {
-          coinElement.textContent = newName
-        }
-
-        showNotification(`Coin name updated successfully to "${newName}"`, "success")
-        closeEditCoinModal()
-      } else {
-        showNotification("Error updating coin name", "error")
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error)
-      showNotification("Error updating coin name", "error")
-    })
 }
 
 function loadAuthCodes() {
@@ -535,10 +599,29 @@ function logout() {
   window.location.reload()
 }
 
-// Close modal when clicking outside
-window.onclick = (event) => {
-  const editModal = document.getElementById("editCoinModal")
-  if (event.target === editModal) {
-    closeEditCoinModal()
+function editWalletName(currentName) {
+  const newName = prompt(`Edit wallet name:`, currentName)
+
+  if (newName && newName !== currentName && newName.trim() !== "") {
+    // Update the wallet name in the UI
+    const walletCards = document.querySelectorAll(".wallet-management-card")
+
+    walletCards.forEach((card) => {
+      const walletNameElement = card.querySelector("h3")
+      if (walletNameElement.textContent === currentName) {
+        walletNameElement.textContent = newName.trim()
+
+        // Update the onclick handlers
+        const availableBtn = card.querySelector(".status-btn.available")
+        const unavailableBtn = card.querySelector(".status-btn.unavailable")
+        const editBtn = card.querySelector(".btn-edit")
+
+        availableBtn.setAttribute("onclick", `setWalletStatus('${newName.trim()}', true)`)
+        unavailableBtn.setAttribute("onclick", `setWalletStatus('${newName.trim()}', false)`)
+        editBtn.setAttribute("onclick", `editWalletName('${newName.trim()}')`)
+      }
+    })
+
+    showNotification(`Wallet name updated to "${newName.trim()}"`, "success")
   }
 }

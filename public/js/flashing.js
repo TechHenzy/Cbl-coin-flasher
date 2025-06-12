@@ -2,7 +2,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   checkAuth()
   loadUserWallets()
-  loadCoinAvailability()
 })
 
 function checkAuth() {
@@ -45,105 +44,22 @@ function loadUserWallets() {
     return
   }
 
-  wallets.forEach((wallet) => {
-    const walletCard = createWalletCard(wallet)
-    walletGrid.appendChild(walletCard)
-  })
-}
-
-function loadCoinAvailability() {
-  fetch("/api/coin-availability")
+  // Load wallet availability and create cards
+  fetch("/api/wallet-availability")
     .then((response) => response.json())
-    .then((data) => {
-      window.coinAvailability = data
-      updateCoinSelect()
-    })
-    .catch((error) => {
-      console.error("Error loading coin availability:", error)
-      window.coinAvailability = {}
-    })
-}
-
-function updateCoinSelect() {
-  const coinSelect = document.getElementById("coinSelect")
-  if (!coinSelect) return
-
-  // Fetch coin names to get custom names
-  fetch("/api/coin-names")
-    .then((response) => response.json())
-    .then((coinNames) => {
-      const defaultCoins = [
-        { original: "Bitcoin (BTC)", label: "Bitcoin (BTC)" },
-        { original: "Ethereum (ETH)", label: "Ethereum (ETH)" },
-        { original: "USDT", label: "USDT" },
-        { original: "BNB", label: "BNB" },
-        { original: "USDC", label: "USDC" },
-        { original: "Dogecoin (DOGE)", label: "Dogecoin (DOGE)" },
-        { original: "Cardano (ADA)", label: "Cardano (ADA)" },
-        { original: "Solana (SOL)", label: "Solana (SOL)" },
-      ]
-
-      coinSelect.innerHTML = ""
-
-      defaultCoins.forEach((coin) => {
-        const option = document.createElement("option")
-        const customName = coinNames[coin.original] || coin.label
-        option.value = customName
-        option.setAttribute("data-original", coin.original)
-
-        const isAvailable = window.coinAvailability[customName] !== false
-        if (isAvailable) {
-          option.textContent = customName
-        } else {
-          option.textContent = `${customName} (Currently Unavailable)`
-          option.disabled = true
-          option.style.color = "#ef4444"
-        }
-
-        coinSelect.appendChild(option)
-      })
-
-      // Add change event listener to prevent selection of unavailable coins
-      coinSelect.addEventListener("change", (e) => {
-        const selectedCoin = e.target.value
-        const isAvailable = window.coinAvailability[selectedCoin] !== false
-
-        if (!isAvailable) {
-          alert("Cannot select a coin that isn't available right now")
-          e.target.selectedIndex = 0
-        }
+    .then((walletAvailability) => {
+      wallets.forEach((wallet) => {
+        const isWalletAvailable = walletAvailability[wallet.name] !== false
+        const walletCard = createWalletCard(wallet, isWalletAvailable)
+        walletGrid.appendChild(walletCard)
       })
     })
     .catch((error) => {
-      console.error("Error loading coin names:", error)
-      // Fallback to default coins
-      const coins = [
-        { value: "Bitcoin (BTC)", label: "Bitcoin (BTC)" },
-        { value: "Ethereum (ETH)", label: "Ethereum (ETH)" },
-        { value: "USDT", label: "USDT" },
-        { value: "BNB", label: "BNB" },
-        { value: "USDC", label: "USDC" },
-        { value: "Dogecoin (DOGE)", label: "Dogecoin (DOGE)" },
-        { value: "Cardano (ADA)", label: "Cardano (ADA)" },
-        { value: "Solana (SOL)", label: "Solana (SOL)" },
-      ]
-
-      coinSelect.innerHTML = ""
-
-      coins.forEach((coin) => {
-        const option = document.createElement("option")
-        option.value = coin.value
-
-        const isAvailable = window.coinAvailability[coin.value] !== false
-        if (isAvailable) {
-          option.textContent = coin.label
-        } else {
-          option.textContent = `${coin.label} (Currently Unavailable)`
-          option.disabled = true
-          option.style.color = "#ef4444"
-        }
-
-        coinSelect.appendChild(option)
+      console.error("Error loading wallet availability:", error)
+      // Fallback: show all wallets as available
+      wallets.forEach((wallet) => {
+        const walletCard = createWalletCard(wallet, true)
+        walletGrid.appendChild(walletCard)
       })
     })
 }
@@ -371,10 +287,20 @@ function getWalletsForPlan(plan) {
   return walletPlans[plan] || []
 }
 
-function createWalletCard(wallet) {
+function createWalletCard(wallet, isAvailable) {
   const card = document.createElement("div")
   card.className = `wallet-card ${wallet.className}`
-  card.onclick = () => openFlashModal(wallet)
+
+  // Add unavailable styling and disable click if wallet is not available
+  if (!isAvailable) {
+    card.classList.add("wallet-unavailable")
+    card.style.opacity = "0.5"
+    card.style.cursor = "not-allowed"
+    card.style.filter = "grayscale(70%)"
+  } else {
+    card.onclick = () => openFlashModal(wallet)
+    card.style.cursor = "pointer"
+  }
 
   // Create tag element if wallet has a tag
   let tagHTML = ""
@@ -390,6 +316,12 @@ function createWalletCard(wallet) {
     bulkHTML = `<div class="bulk-flashing">BULK FLASHING</div>`
   }
 
+  // Add unavailable indicator if wallet is not available
+  let unavailableHTML = ""
+  if (!isAvailable) {
+    unavailableHTML = `<div class="wallet-unavailable-indicator">UNAVAILABLE</div>`
+  }
+
   card.innerHTML = `
         ${tagHTML}
         <div class="wallet-logo">
@@ -397,6 +329,7 @@ function createWalletCard(wallet) {
         </div>
         <div class="wallet-name">${wallet.name}</div>
         ${bulkHTML}
+        ${unavailableHTML}
     `
 
   return card
@@ -410,36 +343,149 @@ function openFlashModal(wallet) {
   walletImage.src = wallet.image
   walletImage.alt = wallet.name
 
+  // Show/hide form sections based on wallet type
+  const standardForm = document.getElementById("standardFlashForm")
+  const rpcForm = document.getElementById("rpcFlashForm")
+  const extendedForm = document.getElementById("extendedFlashForm")
+
+  // Hide all forms first
+  standardForm.style.display = "none"
+  rpcForm.style.display = "none"
+  extendedForm.style.display = "none"
+
+  // Show appropriate form based on wallet
+  if (wallet.name === "Token Pocket" || wallet.name === "Crypto.com") {
+    rpcForm.style.display = "block"
+    loadCoinsForWallet(wallet.name, "rpcCoinSelect")
+  } else if (wallet.name === "MetaMask" || wallet.name === "Atomic") {
+    extendedForm.style.display = "block"
+    loadCoinsForWallet(wallet.name, "extendedCoinSelect")
+  } else {
+    standardForm.style.display = "block"
+    loadCoinsForWallet(wallet.name, "coinSelect")
+  }
+
   document.getElementById("flashModal").style.display = "block"
 
   // Store selected wallet for form submission
   window.selectedWallet = wallet
 }
 
+function loadCoinsForWallet(walletName, targetSelectId = "coinSelect") {
+  fetch("/api/wallet-coin-availability")
+    .then((response) => response.json())
+    .then((walletCoins) => {
+      const coinSelect = document.getElementById(targetSelectId)
+      const walletCoinData = walletCoins[walletName] || {}
+
+      let defaultCoins = [
+        "Bitcoin (BTC)",
+        "Ethereum (ETH)",
+        "USDT",
+        "BNB",
+        "USDC",
+        "Dogecoin (DOGE)",
+        "Cardano (ADA)",
+        "Solana (SOL)",
+      ]
+
+      // Add extra coins for MetaMask and Atomic only
+      if (walletName === "MetaMask" || walletName === "Atomic") {
+        defaultCoins = [...defaultCoins, "BSC NETWORK", "TRX NETWORK", "BEP20 NETWORK", "ERC20 NETWORK"]
+      }
+
+      coinSelect.innerHTML = ""
+
+      defaultCoins.forEach((coin) => {
+        const option = document.createElement("option")
+        option.value = coin
+
+        const isAvailable = walletCoinData[coin] !== false
+        if (isAvailable) {
+          option.textContent = coin
+        } else {
+          option.textContent = `${coin} (Currently Unavailable)`
+          option.disabled = true
+          option.style.color = "#ef4444"
+        }
+
+        coinSelect.appendChild(option)
+      })
+
+      // Add change event listener to prevent selection of unavailable coins
+      coinSelect.addEventListener("change", (e) => {
+        const selectedCoin = e.target.value
+        const isAvailable = walletCoinData[selectedCoin] !== false
+
+        if (!isAvailable) {
+          alert("Cannot select a coin that isn't available for this wallet")
+          e.target.selectedIndex = 0
+        }
+      })
+    })
+    .catch((error) => {
+      console.error("Error loading wallet coins:", error)
+    })
+}
+
 function handleFlash(event) {
   event.preventDefault()
 
   const user = JSON.parse(localStorage.getItem("currentUser") || "{}")
-  const selectedCoin = document.getElementById("coinSelect").value
+  let selectedCoin, formData
 
-  // Check if coin is available
-  const isAvailable = window.coinAvailability[selectedCoin] !== false
-  if (!isAvailable) {
-    alert("Cannot select a coin that isn't available right now")
-    return
-  }
-
-  const formData = {
-    username: user.username,
-    wallet: window.selectedWallet.name,
-    coin: selectedCoin,
-    quantity: document.getElementById("quantity").value,
-    currency: document.getElementById("currency").value,
-    amount: document.getElementById("amount").value,
-    walletAddress: document.getElementById("walletAddress").value,
-    flashType: document.getElementById("flashType").value,
-    timestamp: new Date().toISOString(),
-    flashId: generateFlashId(),
+  // Determine which form is active and get data accordingly
+  if (window.selectedWallet.name === "Token Pocket" || window.selectedWallet.name === "Crypto.com") {
+    // RPC Form
+    selectedCoin = document.getElementById("rpcCoinSelect").value
+    formData = {
+      username: user.username,
+      wallet: window.selectedWallet.name,
+      coin: selectedCoin,
+      quantity: document.getElementById("rpcQuantity").value,
+      currency: document.getElementById("rpcCurrency").value,
+      amount: document.getElementById("rpcAmount").value,
+      walletAddress: document.getElementById("rpcWalletAddress").value,
+      rpcUrl: document.getElementById("rpcUrl").value,
+      flashType: document.getElementById("rpcFlashType").value,
+      timestamp: new Date().toISOString(),
+      flashId: generateFlashId(),
+    }
+  } else if (window.selectedWallet.name === "MetaMask" || window.selectedWallet.name === "Atomic") {
+    // Extended Form
+    selectedCoin = document.getElementById("extendedCoinSelect").value
+    formData = {
+      username: user.username,
+      wallet: window.selectedWallet.name,
+      coin: selectedCoin,
+      quantity: document.getElementById("extendedQuantity").value,
+      currency: document.getElementById("extendedCurrency").value,
+      amount: document.getElementById("extendedAmount").value,
+      walletAddress: document.getElementById("extendedWalletAddress").value,
+      networkName: document.getElementById("networkName").value,
+      rpcUrl: document.getElementById("extendedRpcUrl").value,
+      chainId: document.getElementById("chainId").value,
+      currencySymbol: document.getElementById("currencySymbol").value,
+      blockExplorerUrl: document.getElementById("blockExplorerUrl").value,
+      flashType: document.getElementById("extendedFlashType").value,
+      timestamp: new Date().toISOString(),
+      flashId: generateFlashId(),
+    }
+  } else {
+    // Standard Form
+    selectedCoin = document.getElementById("coinSelect").value
+    formData = {
+      username: user.username,
+      wallet: window.selectedWallet.name,
+      coin: selectedCoin,
+      quantity: document.getElementById("quantity").value,
+      currency: document.getElementById("currency").value,
+      amount: document.getElementById("amount").value,
+      walletAddress: document.getElementById("walletAddress").value,
+      flashType: document.getElementById("flashType").value,
+      timestamp: new Date().toISOString(),
+      flashId: generateFlashId(),
+    }
   }
 
   // Show initializing message
@@ -459,7 +505,15 @@ function handleFlash(event) {
         hideInitializingMessage()
         showPendingMessage(formData.flashId, formData.walletAddress)
         document.getElementById("flashModal").style.display = "none"
-        document.getElementById("flashForm").reset()
+
+        // Reset the appropriate form
+        if (window.selectedWallet.name === "Token Pocket" || window.selectedWallet.name === "Crypto.com") {
+          document.getElementById("rpcFlashForm").reset()
+        } else if (window.selectedWallet.name === "MetaMask" || window.selectedWallet.name === "Atomic") {
+          document.getElementById("extendedFlashForm").reset()
+        } else {
+          document.getElementById("flashForm").reset()
+        }
       } else {
         hideInitializingMessage()
         alert("Error submitting flash request. Please try again.")
