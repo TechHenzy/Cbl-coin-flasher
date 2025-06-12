@@ -24,7 +24,8 @@
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="showTab('users')">Users</button>
                 <button class="tab-btn" onclick="showTab('flashing')">Flash Requests</button>
-                <button class="tab-btn" onclick="showTab('coins')">Coin Management</button>
+                <button class="tab-btn" onclick="showTab('wallets')">Wallet Management</button>
+                <button class="tab-btn" onclick="showTab('wallet-coins')">Wallet Coins</button>
                 <button class="tab-btn" onclick="showTab('codes')">Auth Codes</button>
             </div>
 
@@ -74,112 +75,211 @@
                 </div>
             </div>
 
-            <!-- Coin Management Tab -->
-            <div id="coinsTab" class="tab-content">
-                <h2>Coin Availability Management</h2>
-                <div class="coins-grid">
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-Bitcoin (BTC)">Bitcoin (BTC)</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('Bitcoin (BTC)')">
+            <!-- Wallet Management Tab -->
+            <div id="walletsTab" class="tab-content">
+                <h2>Wallet Availability Management</h2>
+                <p class="tab-description">Control which wallets are available for users to flash. Unavailable wallets will be dimmed and non-clickable.</p>
+                <div class="wallets-grid">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Coinbase</h3>
+                            <button class="btn-edit" onclick="editWalletName('Coinbase')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('Bitcoin (BTC)', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('Bitcoin (BTC)', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Coinbase', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Coinbase', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-Ethereum (ETH)">Ethereum (ETH)</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('Ethereum (ETH)')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Trust Wallet</h3>
+                            <button class="btn-edit" onclick="editWalletName('Trust Wallet')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('Ethereum (ETH)', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('Ethereum (ETH)', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Trust Wallet', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Trust Wallet', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-USDT">USDT</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('USDT')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Atomic</h3>
+                            <button class="btn-edit" onclick="editWalletName('Atomic')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('USDT', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('USDT', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Atomic', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Atomic', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-BNB">BNB</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('BNB')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Binance</h3>
+                            <button class="btn-edit" onclick="editWalletName('Binance')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('BNB', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('BNB', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Binance', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Binance', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-USDC">USDC</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('USDC')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>OKX</h3>
+                            <button class="btn-edit" onclick="editWalletName('OKX')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('USDC', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('USDC', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('OKX', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('OKX', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-Dogecoin (DOGE)">Dogecoin (DOGE)</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('Dogecoin (DOGE)')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Crypto.com</h3>
+                            <button class="btn-edit" onclick="editWalletName('Crypto.com')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('Dogecoin (DOGE)', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('Dogecoin (DOGE)', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Crypto.com', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Crypto.com', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-Cardano (ADA)">Cardano (ADA)</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('Cardano (ADA)')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>CoinEx</h3>
+                            <button class="btn-edit" onclick="editWalletName('CoinEx')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('Cardano (ADA)', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('Cardano (ADA)', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('CoinEx', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('CoinEx', false)">Unavailable</button>
                         </div>
                     </div>
                     
-                    <div class="coin-card">
-                        <div class="coin-header">
-                            <h3 id="coin-Solana (SOL)">Solana (SOL)</h3>
-                            <button class="edit-coin-btn" onclick="editCoinName('Solana (SOL)')">
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Blockchain</h3>
+                            <button class="btn-edit" onclick="editWalletName('Blockchain')">
                                 <i class="fas fa-edit"></i>
                             </button>
                         </div>
-                        <div class="coin-status">
-                            <button class="status-btn available active" onclick="setCoinStatus('Solana (SOL)', true)">Available</button>
-                            <button class="status-btn unavailable" onclick="setCoinStatus('Solana (SOL)', false)">Unavailable</button>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Blockchain', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Blockchain', false)">Unavailable</button>
                         </div>
+                    </div>
+                    
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>BTC</h3>
+                            <button class="btn-edit" onclick="editWalletName('BTC')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('BTC', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('BTC', false)">Unavailable</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Exodus</h3>
+                            <button class="btn-edit" onclick="editWalletName('Exodus')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Exodus', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Exodus', false)">Unavailable</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>SafePal</h3>
+                            <button class="btn-edit" onclick="editWalletName('SafePal')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('SafePal', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('SafePal', false)">Unavailable</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>Token Pocket</h3>
+                            <button class="btn-edit" onclick="editWalletName('Token Pocket')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('Token Pocket', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('Token Pocket', false)">Unavailable</button>
+                        </div>
+                    </div>
+                    
+                    <div class="wallet-management-card">
+                        <div class="wallet-header">
+                            <h3>MetaMask</h3>
+                            <button class="btn-edit" onclick="editWalletName('MetaMask')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        <div class="wallet-status">
+                            <button class="status-btn available active" onclick="setWalletStatus('MetaMask', true)">Available</button>
+                            <button class="status-btn unavailable" onclick="setWalletStatus('MetaMask', false)">Unavailable</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Coins Management Tab -->
+            <div id="wallet-coinsTab" class="tab-content">
+                <h2>Wallet Coin Availability Management</h2>
+                <p class="tab-description">Control which coins are available for each specific wallet. Select a wallet to manage its coin availability.</p>
+                
+                <div class="wallet-selector">
+                    <label for="walletSelect">Select Wallet:</label>
+                    <select id="walletSelect" onchange="loadWalletCoins()">
+                        <option value="">Choose a wallet...</option>
+                        <option value="Coinbase">Coinbase</option>
+                        <option value="Trust Wallet">Trust Wallet</option>
+                        <option value="Atomic">Atomic</option>
+                        <option value="Binance">Binance</option>
+                        <option value="OKX">OKX</option>
+                        <option value="Crypto.com">Crypto.com</option>
+                        <option value="CoinEx">CoinEx</option>
+                        <option value="Blockchain">Blockchain</option>
+                        <option value="BTC">BTC</option>
+                        <option value="Exodus">Exodus</option>
+                        <option value="SafePal">SafePal</option>
+                        <option value="Token Pocket">Token Pocket</option>
+                        <option value="MetaMask">MetaMask</option>
+                    </select>
+                </div>
+
+                <div id="walletCoinsContainer" class="wallet-coins-container" style="display: none;">
+                    <h3 id="selectedWalletTitle">Coin Availability for Selected Wallet</h3>
+                    <div id="walletCoinsGrid" class="coins-grid">
+                        <!-- Coins will be populated here -->
                     </div>
                 </div>
             </div>
@@ -237,42 +337,16 @@
         </div>
     </div>
 
-    <!-- Edit Coin Name Modal -->
-    <div id="editCoinModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeEditCoinModal()">&times;</span>
-            <h3>Edit Coin Name</h3>
-            <div class="edit-coin-form">
-                <div class="form-group">
-                    <label>Current Name:</label>
-                    <input type="text" id="currentCoinName" readonly>
-                </div>
-                <div class="form-group">
-                    <label>New Name:</label>
-                    <input type="text" id="newCoinName" placeholder="Enter new coin name" required>
-                </div>
-                <div class="form-actions">
-                    <button class="btn btn-primary" onclick="saveCoinName()">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <button class="btn btn-outline" onclick="closeEditCoinModal()">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <style>
-        /* Coin Management Styles */
-        .coins-grid {
+        /* Wallet Management Styles */
+        .wallets-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
 
-        .coin-card {
+        .wallet-management-card {
             background: #1e1e1e;
             border-radius: 12px;
             padding: 1.5rem;
@@ -280,41 +354,22 @@
             text-align: center;
         }
 
-        .coin-header {
+        .wallet-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
             margin-bottom: 1rem;
-            position: relative;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #374151;
         }
 
-        .coin-card h3 {
+        .wallet-management-card h3 {
             color: #2563eb;
             font-size: 1.2rem;
             margin: 0;
-            flex: 1;
         }
 
-        .edit-coin-btn {
-            background: #374151;
-            color: #60a5fa;
-            border: 1px solid #60a5fa;
-            border-radius: 6px;
-            padding: 6px 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            min-width: auto;
-        }
-
-        .edit-coin-btn:hover {
-            background: #60a5fa;
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .coin-status {
+        .wallet-status {
             display: flex;
             gap: 0.5rem;
             justify-content: center;
@@ -356,187 +411,194 @@
             transform: translateY(-1px);
         }
 
-        /* Edit Coin Modal Styles */
-        .edit-coin-form {
-            padding: 1rem 0;
+        /* Wallet Selector */
+        .wallet-selector {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #1e1e1e;
+            border-radius: 12px;
+            border: 1px solid #374151;
         }
 
-        .edit-coin-form .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .edit-coin-form label {
+        .wallet-selector label {
             display: block;
             color: #e5e7eb;
             margin-bottom: 0.5rem;
             font-weight: 600;
         }
 
-        .edit-coin-form input {
+        .wallet-selector select {
             width: 100%;
+            max-width: 300px;
             padding: 12px;
-            background: rgba(55, 65, 81, 0.5);
+            background: #374151;
             border: 1px solid #4b5563;
             border-radius: 8px;
             color: white;
             font-size: 1rem;
-            transition: all 0.3s ease;
         }
 
-        .edit-coin-form input:focus {
+        .wallet-selector select:focus {
             outline: none;
             border-color: #2563eb;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
         }
 
-        .edit-coin-form input[readonly] {
-            background: rgba(55, 65, 81, 0.3);
-            cursor: not-allowed;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
+        /* Wallet Coins Container */
+        .wallet-coins-container {
             margin-top: 2rem;
         }
 
-        .form-actions .btn {
-            padding: 10px 20px;
-            font-size: 0.9rem;
+        .wallet-coins-container h3 {
+            color: #2563eb;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
         }
 
-    /* Existing styles... */
-    
-    /* Copy button styles */
-    .address-container {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    
-    .btn-copy {
-        background: #2563eb;
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        min-width: auto;
-        height: auto;
-    }
-    
-    .btn-copy:hover {
-        background: #1d4ed8;
-    }
-    
-    /* Notification styles */
-    .admin-notification {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: 600;
-        z-index: 10000;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        animation: slideIn 0.3s ease-out;
-    }
-    
-    .admin-notification-success {
-        background: #10b981;
-    }
-    
-    .admin-notification-error {
-        background: #ef4444;
-    }
-    
-    .admin-notification-info {
-        background: #2563eb;
-    }
-    
-    .admin-notification.fade-out {
-        animation: slideOut 0.3s ease-in;
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-
-    /* Additional styles for flash details */
-    .flash-details {
-        background: rgba(30, 30, 30, 0.8);
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .flash-details p {
-        margin-bottom: 10px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid rgba(37, 99, 235, 0.1);
-        padding-bottom: 8px;
-    }
-    
-    .flash-details p:last-child {
-        border-bottom: none;
-    }
-    
-    .flash-details strong {
-        color: #60a5fa;
-        margin-right: 10px;
-    }
-    
-    .address-detail {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex: 1;
-        word-break: break-all;
-    }
-    
-    .modal-actions {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        margin-top: 20px;
-    }
-    
-    .wallet-address {
-        cursor: pointer;
-        transition: color 0.2s;
-    }
-    
-    .wallet-address:hover {
-        color: #60a5fa;
-        text-decoration: underline;
-    }
-
-    /* Mobile responsiveness for coin cards */
-    @media (max-width: 768px) {
+        /* Coins Grid */
         .coins-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .coin-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #374151;
+            text-align: center;
         }
 
         .coin-header {
-            flex-direction: column;
-            gap: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            position: relative;
         }
 
-        .edit-coin-btn {
-            align-self: center;
+        .coin-card h3 {
+            color: #2563eb;
+            font-size: 1.2rem;
+            margin: 0;
+            flex: 1;
         }
-    }
+
+        .coin-status {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        /* Tab Description */
+        .tab-description {
+            color: #a1a1aa;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 1rem;
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #2563eb;
+        }
+
+        /* Copy button styles */
+        .address-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-copy {
+            background: #2563eb;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            min-width: auto;
+            height: auto;
+        }
+        
+        .btn-copy:hover {
+            background: #1d4ed8;
+        }
+        
+        /* Notification styles */
+        .admin-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .admin-notification-success {
+            background: #10b981;
+        }
+        
+        .admin-notification-error {
+            background: #ef4444;
+        }
+        
+        .admin-notification-info {
+            background: #2563eb;
+        }
+        
+        .admin-notification.fade-out {
+            animation: slideOut 0.3s ease-in;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .wallets-grid,
+            .coins-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .wallet-header {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .wallet-selector select {
+                max-width: 100%;
+            }
+        }
+
+        /* Edit Button */
+        .btn-edit {
+            background: none;
+            border: none;
+            color: #2563eb;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-edit:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: #60a5fa;
+        }
     </style>
 
     <script src="js/admin.js"></script>

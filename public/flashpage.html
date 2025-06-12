@@ -41,59 +41,175 @@
                 <h2 id="flashTitle">Flash via Wallet</h2>
                 <p>Flash Coins</p>
             </div>
+        
+        <!-- Standard Form (for most wallets) -->
+        <form id="standardFlashForm" onsubmit="handleFlash(event)" style="display: none;">
+            <div class="form-group">
+                <label>Coin:</label>
+                <select id="coinSelect" required>
+                    <!-- Coins will be populated based on selected wallet -->
+                </select>
+            </div>
             
-            <form id="flashForm" onsubmit="handleFlash(event)">
-                <div class="form-group">
-                    <label>Coin:</label>
-                    <select id="coinSelect" required>
-                        <option value="Bitcoin (BTC)">Bitcoin (BTC)</option>
-                        <option value="Ethereum (ETH)">Ethereum (ETH)</option>
-                        <option value="USDT">USDT</option>
-                        <option value="BNB">BNB</option>
-                        <option value="USDC">USDC</option>
-                        <option value="Dogecoin (DOGE)">Dogecoin (DOGE)</option>
-                        <option value="Cardano (ADA)">Cardano (ADA)</option>
-                        <option value="Solana (SOL)">Solana (SOL)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Quantity:</label>
-                    <input type="number" id="quantity" step="0.00000001" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Currency:</label>
-                    <select id="currency" required>
-                        <option value="US Dollar (USD)">US Dollar (USD)</option>
-                        <option value="Nigerian Naira (NGN)">Nigerian Naira (NGN)</option>
-                        <option value="Euro (EUR)">Euro (EUR)</option>
-                        <option value="British Pound (GBP)">British Pound (GBP)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Amount:</label>
-                    <input type="number" id="amount" step="0.01" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Wallet Address:</label>
-                    <input type="text" id="walletAddress" placeholder="Enter recipient wallet address" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>Flash Type:</label>
-                    <select id="flashType" required>
-                        <option value="auto">Auto</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary flash-btn">
-                    <i class="fas fa-bolt"></i> Flash
-                </button>
-            </form>
-        </div>
+            <div class="form-group">
+                <label>Quantity:</label>
+                <input type="number" id="quantity" step="0.00000001" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Currency:</label>
+                <select id="currency" required>
+                    <option value="US Dollar (USD)">US Dollar (USD)</option>
+                    <option value="Nigerian Naira (NGN)">Nigerian Naira (NGN)</option>
+                    <option value="Euro (EUR)">Euro (EUR)</option>
+                    <option value="British Pound (GBP)">British Pound (GBP)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Amount:</label>
+                <input type="number" id="amount" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Wallet Address:</label>
+                <input type="text" id="walletAddress" placeholder="Enter recipient wallet address" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Flash Type:</label>
+                <select id="flashType" required>
+                    <option value="auto">Auto</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary flash-btn">
+                <i class="fas fa-bolt"></i> Flash
+            </button>
+        </form>
+
+        <!-- RPC Form (for Token Pocket and Crypto.com) -->
+        <form id="rpcFlashForm" onsubmit="handleFlash(event)" style="display: none;">
+            <div class="form-group">
+                <label>Coin:</label>
+                <select id="rpcCoinSelect" required>
+                    <!-- Coins will be populated based on selected wallet -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Quantity:</label>
+                <input type="number" id="rpcQuantity" step="0.00000001" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Currency:</label>
+                <select id="rpcCurrency" required>
+                    <option value="US Dollar (USD)">US Dollar (USD)</option>
+                    <option value="Nigerian Naira (NGN)">Nigerian Naira (NGN)</option>
+                    <option value="Euro (EUR)">Euro (EUR)</option>
+                    <option value="British Pound (GBP)">British Pound (GBP)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Amount:</label>
+                <input type="number" id="rpcAmount" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Wallet Address:</label>
+                <input type="text" id="rpcWalletAddress" placeholder="Enter recipient wallet address" required>
+            </div>
+            
+            <div class="form-group">
+                <label>RPC URL:</label>
+                <input type="url" id="rpcUrl" placeholder="Enter the URL of the RPC node" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Flash Type:</label>
+                <select id="rpcFlashType" required>
+                    <option value="auto">Auto</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary flash-btn">
+                <i class="fas fa-bolt"></i> Flash
+            </button>
+        </form>
+
+        <!-- Extended Form (for MetaMask and Atomic) -->
+        <form id="extendedFlashForm" onsubmit="handleFlash(event)" style="display: none;">
+            <div class="form-group">
+                <label>Network Name (Coin):</label>
+                <select id="extendedCoinSelect" required>
+                    <!-- Coins will be populated based on selected wallet -->
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Quantity:</label>
+                <input type="number" id="extendedQuantity" step="0.00000001" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Currency:</label>
+                <select id="extendedCurrency" required>
+                    <option value="US Dollar (USD)">US Dollar (USD)</option>
+                    <option value="Nigerian Naira (NGN)">Nigerian Naira (NGN)</option>
+                    <option value="Euro (EUR)">Euro (EUR)</option>
+                    <option value="British Pound (GBP)">British Pound (GBP)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Amount:</label>
+                <input type="number" id="extendedAmount" step="0.01" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Wallet Address:</label>
+                <input type="text" id="extendedWalletAddress" placeholder="Enter recipient wallet address" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Network Name:</label>
+                <input type="text" id="networkName" placeholder="Enter network name" required>
+            </div>
+            
+            <div class="form-group">
+                <label>RPC URL:</label>
+                <input type="url" id="extendedRpcUrl" placeholder="Enter RPC URL" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Chain ID:</label>
+                <input type="text" id="chainId" placeholder="Enter Chain ID" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Currency Symbol:</label>
+                <input type="text" id="currencySymbol" placeholder="Enter currency symbol" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Block Explorer URL (optional):</label>
+                <input type="url" id="blockExplorerUrl" placeholder="Enter block explorer URL">
+            </div>
+            
+            <div class="form-group">
+                <label>Flash Type:</label>
+                <select id="extendedFlashType" required>
+                    <option value="auto">Auto</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary flash-btn">
+                <i class="fas fa-bolt"></i> Flash
+            </button>
+        </form>
+    </div>
     </div>
 
     <style>
@@ -123,6 +239,33 @@
         .wallet-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Unavailable wallet styling */
+        .wallet-card.wallet-unavailable {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            filter: grayscale(70%) !important;
+        }
+
+        .wallet-card.wallet-unavailable:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .wallet-unavailable-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+            backdrop-filter: blur(5px);
         }
 
         .wallet-logo {
@@ -183,11 +326,6 @@
         .wallet-safepal { background: #1890FF; }
         .wallet-tokenpocket { background: #2980B9; }
         .wallet-metamask { background: #F6851B; }
-        .wallet-cashapp { background: #00D632; }
-        .wallet-paypal { background: #003087; }
-        .wallet-luno { background: #1D57FF; }
-        .wallet-zelle { background: #6D1ED4; }
-        .wallet-bybit { background: #FFAD00; }
 
         .flash-modal {
             max-width: 500px;
