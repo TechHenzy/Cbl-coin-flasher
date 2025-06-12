@@ -1,0 +1,140 @@
+{
+  "Coinbase": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": false,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": false,
+    "Solana (SOL)": true
+  },
+  "Trust Wallet": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": false,
+    "BNB": true,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "Atomic": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": true,
+    "USDC": false,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": false,
+    "BSC NETWORK": true,
+    "TRX NETWORK": true,
+    "BEP20 NETWORK": true,
+    "ERC20 NETWORK": true
+  },
+  "Binance": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": true,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "OKX": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": false,
+    "USDC": true,
+    "Dogecoin (DOGE)": false,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "Crypto.com": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": true,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": false,
+    "Solana (SOL)": true
+  },
+  "CoinEx": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": false,
+    "USDT": true,
+    "BNB": true,
+    "USDC": false,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "Blockchain": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": false,
+    "BNB": false,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": false
+  },
+  "BTC": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": false,
+    "USDT": false,
+    "BNB": false,
+    "USDC": false,
+    "Dogecoin (DOGE)": false,
+    "Cardano (ADA)": false,
+    "Solana (SOL)": false
+  },
+  "Exodus": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": false,
+    "USDC": true,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "SafePal": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": true,
+    "USDC": true,
+    "Dogecoin (DOGE)": false,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "Token Pocket": {
+    "Bitcoin (BTC)": true,
+    "Ethereum (ETH)": true,
+    "USDT": false,
+    "BNB": true,
+    "USDC": false,
+    "Dogecoin (DOGE)": true,
+    "Cardano (ADA)": true,
+    "Solana (SOL)": true
+  },
+  "MetaMask": {
+    "Bitcoin (BTC)": false,
+    "Ethereum (ETH)": true,
+    "USDT": true,
+    "BNB": false,
+    "USDC": true,
+    "Dogecoin (DOGE)": false,
+    "Cardano (ADA)": false,
+    "Solana (SOL)": false,
+    "BSC NETWORK": true,
+    "TRX NETWORK": true,
+    "BEP20 NETWORK": true,
+    "ERC20 NETWORK": true
+  }
+}
