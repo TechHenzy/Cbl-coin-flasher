@@ -4,7 +4,7 @@ const path = require("path")
 const crypto = require("crypto")
 
 const app = express()
-const PORT = process.env.PORT || 7860
+const PORT = process.env.PORT || 3000
 
 // Middleware
 app.use(express.json())
@@ -14,8 +14,8 @@ app.use(express.static("public"))
 const USERS_FILE = path.join(__dirname, "data", "users.json")
 const AUTHS_FILE = path.join(__dirname, "data", "auths.json")
 const FLASH_REQUESTS_FILE = path.join(__dirname, "data", "flash-requests.json")
-const COIN_AVAILABILITY_FILE = path.join(__dirname, "data", "coin-availability.json")
-const COIN_NAMES_FILE = path.join(__dirname, "data", "coin-names.json")
+const WALLET_AVAILABILITY_FILE = path.join(__dirname, "data", "wallet-availability.json")
+const WALLET_COIN_AVAILABILITY_FILE = path.join(__dirname, "data", "wallet-coin-availability.json")
 
 // Initialize data files if they don't exist
 async function initializeDataFiles() {
@@ -37,29 +37,173 @@ async function initializeDataFiles() {
       await fs.writeFile(FLASH_REQUESTS_FILE, JSON.stringify([]))
     }
 
-    // Initialize coin-availability.json
+    // Initialize wallet-availability.json
     try {
-      await fs.access(COIN_AVAILABILITY_FILE)
+      await fs.access(WALLET_AVAILABILITY_FILE)
     } catch {
-      const initialCoinStatus = {
-        "Bitcoin (BTC)": true,
-        "Ethereum (ETH)": true,
-        USDT: true,
-        BNB: true,
-        USDC: true,
-        "Dogecoin (DOGE)": true,
-        "Cardano (ADA)": true,
-        "Solana (SOL)": true,
+      const initialWalletStatus = {
+        Coinbase: true,
+        "Trust Wallet": true,
+        Atomic: true,
+        Binance: true,
+        OKX: true,
+        "Crypto.com": true,
+        CoinEx: true,
+        Blockchain: true,
+        BTC: true,
+        Exodus: true,
+        SafePal: true,
+        "Token Pocket": true,
+        MetaMask: true,
       }
-      await fs.writeFile(COIN_AVAILABILITY_FILE, JSON.stringify(initialCoinStatus, null, 2))
+      await fs.writeFile(WALLET_AVAILABILITY_FILE, JSON.stringify(initialWalletStatus, null, 2))
     }
 
-    // Initialize coin-names.json
+    // Initialize wallet-coin-availability.json
     try {
-      await fs.access(COIN_NAMES_FILE)
+      await fs.access(WALLET_COIN_AVAILABILITY_FILE)
     } catch {
-      const initialCoinNames = {}
-      await fs.writeFile(COIN_NAMES_FILE, JSON.stringify(initialCoinNames, null, 2))
+      const initialWalletCoinStatus = {
+        Coinbase: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: false,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": false,
+          "Solana (SOL)": true,
+        },
+        "Trust Wallet": {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: false,
+          BNB: true,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        Atomic: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: true,
+          USDC: false,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": false,
+          "BSC NETWORK": true,
+          "TRX NETWORK": true,
+          "BEP20 NETWORK": true,
+          "ERC20 NETWORK": true,
+        },
+        Binance: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: true,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        OKX: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: false,
+          USDC: true,
+          "Dogecoin (DOGE)": false,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        "Crypto.com": {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: true,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": false,
+          "Solana (SOL)": true,
+        },
+        CoinEx: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": false,
+          USDT: true,
+          BNB: true,
+          USDC: false,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        Blockchain: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: false,
+          BNB: false,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": false,
+        },
+        BTC: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": false,
+          USDT: false,
+          BNB: false,
+          USDC: false,
+          "Dogecoin (DOGE)": false,
+          "Cardano (ADA)": false,
+          "Solana (SOL)": false,
+        },
+        Exodus: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: false,
+          USDC: true,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        SafePal: {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: true,
+          USDC: true,
+          "Dogecoin (DOGE)": false,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        "Token Pocket": {
+          "Bitcoin (BTC)": true,
+          "Ethereum (ETH)": true,
+          USDT: false,
+          BNB: true,
+          USDC: false,
+          "Dogecoin (DOGE)": true,
+          "Cardano (ADA)": true,
+          "Solana (SOL)": true,
+        },
+        MetaMask: {
+          "Bitcoin (BTC)": false,
+          "Ethereum (ETH)": true,
+          USDT: true,
+          BNB: false,
+          USDC: true,
+          "Dogecoin (DOGE)": false,
+          "Cardano (ADA)": false,
+          "Solana (SOL)": false,
+          "BSC NETWORK": true,
+          "TRX NETWORK": true,
+          "BEP20 NETWORK": true,
+          "ERC20 NETWORK": true,
+        },
+      }
+      await fs.writeFile(WALLET_COIN_AVAILABILITY_FILE, JSON.stringify(initialWalletCoinStatus, null, 2))
     }
 
     // Initialize auths.json with sample codes
@@ -187,33 +331,24 @@ app.post("/api/login", async (req, res) => {
   }
 })
 
-// Get coin availability with custom names
-app.get("/api/coin-availability", async (req, res) => {
+// Get wallet availability
+app.get("/api/wallet-availability", async (req, res) => {
   try {
-    const coinAvailability = await readJsonFile(COIN_AVAILABILITY_FILE)
-    const coinNames = await readJsonFile(COIN_NAMES_FILE)
-
-    // Create response with custom names
-    const response = {}
-    Object.keys(coinAvailability).forEach((originalName) => {
-      const customName = coinNames[originalName] || originalName
-      response[customName] = coinAvailability[originalName]
-    })
-
-    res.json(response)
+    const walletAvailability = await readJsonFile(WALLET_AVAILABILITY_FILE)
+    res.json(walletAvailability)
   } catch (error) {
-    console.error("Error fetching coin availability:", error)
+    console.error("Error fetching wallet availability:", error)
     res.json({})
   }
 })
 
-// Get coin names mapping
-app.get("/api/coin-names", async (req, res) => {
+// Get wallet coin availability
+app.get("/api/wallet-coin-availability", async (req, res) => {
   try {
-    const coinNames = await readJsonFile(COIN_NAMES_FILE)
-    res.json(coinNames)
+    const walletCoinAvailability = await readJsonFile(WALLET_COIN_AVAILABILITY_FILE)
+    res.json(walletCoinAvailability)
   } catch (error) {
-    console.error("Error fetching coin names:", error)
+    console.error("Error fetching wallet coin availability:", error)
     res.json({})
   }
 })
@@ -406,60 +541,61 @@ app.get("/api/admin/flash-requests", async (req, res) => {
   }
 })
 
-// Get coin availability for admin
-app.get("/api/admin/coin-availability", async (req, res) => {
+// Get wallet availability for admin
+app.get("/api/admin/wallet-availability", async (req, res) => {
   try {
-    const coinAvailability = await readJsonFile(COIN_AVAILABILITY_FILE)
-    res.json(coinAvailability)
+    const walletAvailability = await readJsonFile(WALLET_AVAILABILITY_FILE)
+    res.json(walletAvailability)
   } catch (error) {
-    console.error("Error fetching coin availability:", error)
+    console.error("Error fetching wallet availability:", error)
     res.json({})
   }
 })
 
-// Get coin names for admin
-app.get("/api/admin/coin-names", async (req, res) => {
+// Get wallet coin availability for admin
+app.get("/api/admin/wallet-coin-availability", async (req, res) => {
   try {
-    const coinNames = await readJsonFile(COIN_NAMES_FILE)
-    res.json(coinNames)
+    const walletCoinAvailability = await readJsonFile(WALLET_COIN_AVAILABILITY_FILE)
+    res.json(walletCoinAvailability)
   } catch (error) {
-    console.error("Error fetching coin names:", error)
+    console.error("Error fetching wallet coin availability:", error)
     res.json({})
   }
 })
 
-// Update coin name
-app.post("/api/admin/update-coin-name", async (req, res) => {
+// Set wallet status
+app.post("/api/admin/set-wallet-status", async (req, res) => {
   try {
-    const { originalName, newName } = req.body
+    const { wallet, isAvailable } = req.body
 
-    if (!originalName || !newName) {
-      return res.json({ success: false, message: "Original name and new name are required" })
+    const walletAvailability = await readJsonFile(WALLET_AVAILABILITY_FILE)
+    walletAvailability[wallet] = isAvailable
+
+    await writeJsonFile(WALLET_AVAILABILITY_FILE, walletAvailability)
+    res.json({ success: true })
+  } catch (error) {
+    console.error("Error setting wallet status:", error)
+    res.json({ success: false })
+  }
+})
+
+// Set wallet coin status
+app.post("/api/admin/set-wallet-coin-status", async (req, res) => {
+  try {
+    const { wallet, coin, isAvailable } = req.body
+
+    const walletCoinAvailability = await readJsonFile(WALLET_COIN_AVAILABILITY_FILE)
+
+    if (!walletCoinAvailability[wallet]) {
+      walletCoinAvailability[wallet] = {}
     }
 
-    const coinNames = await readJsonFile(COIN_NAMES_FILE)
-    coinNames[originalName] = newName
+    walletCoinAvailability[wallet][coin] = isAvailable
 
-    await writeJsonFile(COIN_NAMES_FILE, coinNames)
+    await writeJsonFile(WALLET_COIN_AVAILABILITY_FILE, walletCoinAvailability)
     res.json({ success: true })
   } catch (error) {
-    console.error("Error updating coin name:", error)
-    res.json({ success: false, message: "Failed to update coin name" })
-  }
-})
-
-// Set coin status
-app.post("/api/admin/set-coin-status", async (req, res) => {
-  try {
-    const { coin, isAvailable } = req.body
-
-    const coinAvailability = await readJsonFile(COIN_AVAILABILITY_FILE)
-    coinAvailability[coin] = isAvailable
-
-    await writeJsonFile(COIN_AVAILABILITY_FILE, coinAvailability)
-    res.json({ success: true })
-  } catch (error) {
-    console.error("Error setting coin status:", error)
+    console.error("Error setting wallet coin status:", error)
     res.json({ success: false })
   }
 })
