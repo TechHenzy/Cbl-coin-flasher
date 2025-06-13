@@ -27,6 +27,8 @@
                 <button class="tab-btn" onclick="showTab('wallets')">Wallet Management</button>
                 <button class="tab-btn" onclick="showTab('wallet-coins')">Wallet Coins</button>
                 <button class="tab-btn" onclick="showTab('codes')">Auth Codes</button>
+                <!-- Add a new tab button for wallet configurations -->
+                <button class="tab-btn" onclick="showTab('wallet-configs')">Wallet Configurations</button>
             </div>
 
             <!-- Users Tab -->
@@ -280,6 +282,134 @@
                     <h3 id="selectedWalletTitle">Coin Availability for Selected Wallet</h3>
                     <div id="walletCoinsGrid" class="coins-grid">
                         <!-- Coins will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add the new wallet configurations tab content after the wallet-coins tab -->
+            <div id="wallet-configsTab" class="tab-content">
+                <h2>Wallet Configuration Settings</h2>
+                <p class="tab-description">Configure specific settings for special wallets that require additional parameters.</p>
+                
+                <!-- Simple RPC Wallets Section -->
+                <div class="config-section">
+                    <h3>RPC URL Wallets</h3>
+                    <p>Configure RPC URLs for wallets that require them. These values will be pre-filled in user forms.</p>
+                    
+                    <div class="config-cards">
+                        <!-- Token Pocket Configuration -->
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <h4>Token Pocket</h4>
+                            </div>
+                            <div class="config-card-body">
+                                <div class="form-group">
+                                    <label>Default RPC URL:</label>
+                                    <div class="input-with-copy">
+                                        <input type="url" id="tokenPocketRpcUrl" placeholder="Enter RPC URL for Token Pocket">
+                                        <button class="btn-copy" onclick="copyToClipboard('tokenPocketRpcUrl')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="saveWalletConfig('Token Pocket')">
+                                    <i class="fas fa-save"></i> Save Configuration
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Crypto.com Configuration -->
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <h4>Crypto.com</h4>
+                            </div>
+                            <div class="config-card-body">
+                                <div class="form-group">
+                                    <label>Default RPC URL:</label>
+                                    <div class="input-with-copy">
+                                        <input type="url" id="cryptoComRpcUrl" placeholder="Enter RPC URL for Crypto.com">
+                                        <button class="btn-copy" onclick="copyToClipboard('cryptoComRpcUrl')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" onclick="saveWalletConfig('Crypto.com')">
+                                    <i class="fas fa-save"></i> Save Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Extended Network Wallets Section -->
+                <div class="config-section">
+                    <h3>Network Configuration Wallets</h3>
+                    <p>Configure network settings for wallets that support multiple networks. These settings will be pre-filled in user forms.</p>
+                    
+                    <!-- Network Wallet Selector -->
+                    <div class="wallet-selector">
+                        <label for="networkWalletSelect">Select Wallet:</label>
+                        <select id="networkWalletSelect" onchange="loadNetworkWalletConfig()">
+                            <option value="">Choose a wallet...</option>
+                            <option value="MetaMask">MetaMask</option>
+                            <option value="Atomic">Atomic</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Network Selection -->
+                    <div id="networkSelectionContainer" style="display: none; margin-top: 20px;">
+                        <div class="wallet-selector">
+                            <label for="networkSelect">Select Network:</label>
+                            <select id="networkSelect" onchange="loadNetworkConfig()">
+                                <option value="">Choose a network...</option>
+                                <option value="BSC NETWORK">BSC NETWORK</option>
+                                <option value="TRX NETWORK">TRX NETWORK</option>
+                                <option value="BEP20 NETWORK">BEP20 NETWORK</option>
+                                <option value="ERC20 NETWORK">ERC20 NETWORK</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Network Configuration Form -->
+                    <div id="networkConfigForm" class="config-form" style="display: none; margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Network Name:</label>
+                            <input type="text" id="networkName" placeholder="Enter network name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>RPC URL:</label>
+                            <div class="input-with-copy">
+                                <input type="url" id="networkRpcUrl" placeholder="Enter RPC URL">
+                                <button class="btn-copy" onclick="copyToClipboard('networkRpcUrl')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Chain ID:</label>
+                            <input type="text" id="networkChainId" placeholder="Enter chain ID">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Currency Symbol:</label>
+                            <input type="text" id="networkCurrencySymbol" placeholder="Enter currency symbol">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Block Explorer URL:</label>
+                            <div class="input-with-copy">
+                                <input type="url" id="networkBlockExplorerUrl" placeholder="Enter block explorer URL">
+                                <button class="btn-copy" onclick="copyToClipboard('networkBlockExplorerUrl')">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="saveNetworkConfig()">
+                            <i class="fas fa-save"></i> Save Network Configuration
+                        </button>
                     </div>
                 </div>
             </div>
@@ -598,6 +728,109 @@
         .btn-edit:hover {
             background: rgba(37, 99, 235, 0.1);
             color: #60a5fa;
+        }
+
+        /* Wallet Configuration Styles */
+        .config-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #1e1e1e;
+            border-radius: 12px;
+            border: 1px solid #374151;
+        }
+
+        .config-section h3 {
+            color: #2563eb;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .config-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .config-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #374151;
+        }
+
+        .config-card-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #374151;
+        }
+
+        .config-card-header h4 {
+            color: #e5e7eb;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .config-card-body .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .config-card-body label {
+            display: block;
+            color: #e5e7eb;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .config-card-body input[type="url"],
+        .config-card-body input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .config-card-body input[type="url"]:focus,
+        .config-card-body input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .config-form .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .config-form label {
+            display: block;
+            color: #e5e7eb;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .config-form input[type="url"],
+        .config-form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .config-form input[type="url"]:focus,
+        .config-form input[type="text"]:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+
+        .input-with-copy {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
     </style>
 
