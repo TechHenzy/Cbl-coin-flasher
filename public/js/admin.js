@@ -2,6 +2,11 @@
 let isLoggedIn = false
 let currentSelectedWallet = null
 
+// Global variables for wallet configurations
+let currentWalletConfigs = {}
+let currentNetworkWallet = null
+let currentNetwork = null
+
 document.addEventListener("DOMContentLoaded", () => {
   checkAdminAuth()
 })
@@ -32,11 +37,13 @@ function adminLogin(event) {
   }
 }
 
+// Load wallet configurations when admin panel loads
 function loadAdminData() {
   loadUsers()
   loadFlashRequests()
   loadWalletAvailability()
   loadAuthCodes()
+  loadWalletConfigurations() // Add this line
 }
 
 function showTab(tabName) {
@@ -624,4 +631,182 @@ function editWalletName(currentName) {
 
     showNotification(`Wallet name updated to "${newName.trim()}"`, "success")
   }
+}
+
+// Load wallet configurations from server
+function loadWalletConfigurations() {
+  fetch("/api/admin/wallet-configurations")
+    .then((response) => response.json())
+    .then((configs) => {
+      currentWalletConfigs = configs
+
+      // Set values for Token Pocket and Crypto.com
+      if (configs["Token Pocket"] && configs["Token Pocket"].rpcUrl) {
+        document.getElementById("tokenPocketRpcUrl").value = configs["Token Pocket"].rpcUrl
+      }
+
+      if (configs["Crypto.com"] && configs["Crypto.com"].rpcUrl) {
+        document.getElementById("cryptoComRpcUrl").value = configs["Crypto.com"].rpcUrl
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading wallet configurations:", error)
+      showNotification("Error loading wallet configurations", "error")
+    })
+}
+
+// Save configuration for simple RPC wallets (Token Pocket, Crypto.com)
+function saveWalletConfig(wallet) {
+  let config = {}
+
+  if (wallet === "Token Pocket") {
+    config = {
+      rpcUrl: document.getElementById("tokenPocketRpcUrl").value,
+    }
+  } else if (wallet === "Crypto.com") {
+    config = {
+      rpcUrl: document.getElementById("cryptoComRpcUrl").value,
+    }
+  }
+
+  // Validate input
+  if (!config.rpcUrl) {
+    showNotification("Please enter a valid RPC URL", "error")
+    return
+  }
+
+  // Send to server
+  fetch("/api/admin/save-wallet-config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      wallet: wallet,
+      config: config,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        showNotification(`Configuration for ${wallet} saved successfully`, "success")
+      } else {
+        showNotification("Error saving configuration", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      showNotification("Error saving configuration", "error")
+    })
+}
+
+// Load network wallet configuration
+function loadNetworkWalletConfig() {
+  const wallet = document.getElementById("networkWalletSelect").value
+
+  if (!wallet) {
+    document.getElementById("networkSelectionContainer").style.display = "none"
+    document.getElementById("networkConfigForm").style.display = "none"
+    return
+  }
+
+  currentNetworkWallet = wallet
+  document.getElementById("networkSelectionContainer").style.display = "block"
+  document.getElementById("networkConfigForm").style.display = "none"
+
+  // Reset network select
+  document.getElementById("networkSelect").value = ""
+}
+
+// Load network configuration
+function loadNetworkConfig() {
+  const network = document.getElementById("networkSelect").value
+
+  if (!network || !currentNetworkWallet) {
+    document.getElementById("networkConfigForm").style.display = "none"
+    return
+  }
+
+  currentNetwork = network
+  document.getElementById("networkConfigForm").style.display = "block"
+
+  // Load existing configuration if available
+  if (
+    currentWalletConfigs[currentNetworkWallet] &&
+    currentWalletConfigs[currentNetworkWallet].networks &&
+    currentWalletConfigs[currentNetworkWallet].networks[network]
+  ) {
+    const networkConfig = currentWalletConfigs[currentNetworkWallet].networks[network]
+    document.getElementById("networkName").value = networkConfig.networkName || ""
+    document.getElementById("networkRpcUrl").value = networkConfig.rpcUrl || ""
+    document.getElementById("networkChainId").value = networkConfig.chainId || ""
+    document.getElementById("networkCurrencySymbol").value = networkConfig.currencySymbol || ""
+    document.getElementById("networkBlockExplorerUrl").value = networkConfig.blockExplorerUrl || ""
+  } else {
+    // Clear form if no configuration exists
+    document.getElementById("networkName").value = ""
+    document.getElementById("networkRpcUrl").value = ""
+    document.getElementById("networkChainId").value = ""
+    document.getElementById("networkCurrencySymbol").value = ""
+    document.getElementById("networkBlockExplorerUrl").value = ""
+  }
+}
+
+// Save network configuration
+function saveNetworkConfig() {
+  if (!currentNetworkWallet || !currentNetwork) {
+    showNotification("Please select a wallet and network", "error")
+    return
+  }
+
+  const networkConfig = {
+    networkName: document.getElementById("networkName").value,
+    rpcUrl: document.getElementById("networkRpcUrl").value,
+    chainId: document.getElementById("networkChainId").value,
+    currencySymbol: document.getElementById("networkCurrencySymbol").value,
+    blockExplorerUrl: document.getElementById("networkBlockExplorerUrl").value,
+  }
+
+  // Validate required fields
+  if (!networkConfig.networkName || !networkConfig.rpcUrl || !networkConfig.chainId || !networkConfig.currencySymbol) {
+    showNotification("Please fill all required fields", "error")
+    return
+  }
+
+  // Send to server
+  fetch("/api/admin/save-network-config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      wallet: currentNetworkWallet,
+      network: currentNetwork,
+      config: networkConfig,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        showNotification(
+          `Network configuration for ${currentNetworkWallet} - ${currentNetwork} saved successfully`,
+          "success",
+        )
+
+        // Update local configuration
+        if (!currentWalletConfigs[currentNetworkWallet]) {
+          currentWalletConfigs[currentNetworkWallet] = { networks: {} }
+        }
+        if (!currentWalletConfigs[currentNetworkWallet].networks) {
+          currentWalletConfigs[currentNetworkWallet].networks = {}
+        }
+        currentWalletConfigs[currentNetworkWallet].networks[currentNetwork] = networkConfig
+      } else {
+        showNotification("Error saving network configuration", "error")
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error)
+      showNotification("Error saving network configuration", "error")
+    })
 }

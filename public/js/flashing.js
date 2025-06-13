@@ -335,6 +335,7 @@ function createWalletCard(wallet, isAvailable) {
   return card
 }
 
+// Load wallet configurations when opening flash modal
 function openFlashModal(wallet) {
   document.getElementById("flashTitle").textContent = `Flash via ${wallet.name}`
 
@@ -357,9 +358,25 @@ function openFlashModal(wallet) {
   if (wallet.name === "Token Pocket" || wallet.name === "Crypto.com") {
     rpcForm.style.display = "block"
     loadCoinsForWallet(wallet.name, "rpcCoinSelect")
+
+    // Load RPC URL from admin configuration
+    loadWalletConfigurations(wallet.name)
   } else if (wallet.name === "MetaMask" || wallet.name === "Atomic") {
     extendedForm.style.display = "block"
     loadCoinsForWallet(wallet.name, "extendedCoinSelect")
+
+    // Set up network selection change event
+    const networkSelect = document.getElementById("extendedCoinSelect")
+    networkSelect.addEventListener("change", function () {
+      if (
+        this.value === "BSC NETWORK" ||
+        this.value === "TRX NETWORK" ||
+        this.value === "BEP20 NETWORK" ||
+        this.value === "ERC20 NETWORK"
+      ) {
+        loadNetworkConfiguration(wallet.name, this.value)
+      }
+    })
   } else {
     standardForm.style.display = "block"
     loadCoinsForWallet(wallet.name, "coinSelect")
@@ -369,6 +386,54 @@ function openFlashModal(wallet) {
 
   // Store selected wallet for form submission
   window.selectedWallet = wallet
+}
+
+// Load wallet configurations from server
+function loadWalletConfigurations(walletName) {
+  fetch("/api/wallet-configurations")
+    .then((response) => response.json())
+    .then((configs) => {
+      if (walletName === "Token Pocket" && configs["Token Pocket"] && configs["Token Pocket"].rpcUrl) {
+        document.getElementById("rpcUrl").value = configs["Token Pocket"].rpcUrl
+        // Make the field readonly to prevent user modification
+        document.getElementById("rpcUrl").setAttribute("readonly", "readonly")
+      } else if (walletName === "Crypto.com" && configs["Crypto.com"] && configs["Crypto.com"].rpcUrl) {
+        document.getElementById("rpcUrl").value = configs["Crypto.com"].rpcUrl
+        // Make the field readonly to prevent user modification
+        document.getElementById("rpcUrl").setAttribute("readonly", "readonly")
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading wallet configurations:", error)
+    })
+}
+
+// Load network configuration for MetaMask and Atomic
+function loadNetworkConfiguration(walletName, networkName) {
+  fetch("/api/wallet-configurations")
+    .then((response) => response.json())
+    .then((configs) => {
+      if (configs[walletName] && configs[walletName].networks && configs[walletName].networks[networkName]) {
+        const networkConfig = configs[walletName].networks[networkName]
+
+        // Set form values
+        document.getElementById("networkName").value = networkConfig.networkName || ""
+        document.getElementById("extendedRpcUrl").value = networkConfig.rpcUrl || ""
+        document.getElementById("chainId").value = networkConfig.chainId || ""
+        document.getElementById("currencySymbol").value = networkConfig.currencySymbol || ""
+        document.getElementById("blockExplorerUrl").value = networkConfig.blockExplorerUrl || ""
+
+        // Make fields readonly to prevent user modification
+        document.getElementById("networkName").setAttribute("readonly", "readonly")
+        document.getElementById("extendedRpcUrl").setAttribute("readonly", "readonly")
+        document.getElementById("chainId").setAttribute("readonly", "readonly")
+        document.getElementById("currencySymbol").setAttribute("readonly", "readonly")
+        document.getElementById("blockExplorerUrl").setAttribute("readonly", "readonly")
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading network configurations:", error)
+    })
 }
 
 function loadCoinsForWallet(walletName, targetSelectId = "coinSelect") {
