@@ -214,6 +214,85 @@ async function initializeDataFiles() {
       await fs.writeFile(AUTHS_FILE, JSON.stringify(initialCodes, null, 2))
     }
 
+    // Initialize wallet-configurations.json
+    try {
+      await fs.access(path.join(__dirname, "data", "wallet-configurations.json"))
+    } catch {
+      const initialWalletConfigurations = {
+        "Token Pocket": {
+          rpcUrl: "https://bsc-dataseed.binance.org/",
+        },
+        "Crypto.com": {
+          rpcUrl: "https://evm.cronos.org",
+        },
+        MetaMask: {
+          networks: {
+            "BSC NETWORK": {
+              networkName: "Binance Smart Chain",
+              rpcUrl: "https://bsc-dataseed1.binance.org",
+              chainId: "56",
+              currencySymbol: "BNB",
+              blockExplorerUrl: "https://bscscan.com",
+            },
+            "TRX NETWORK": {
+              networkName: "TRON Network",
+              rpcUrl: "https://api.trongrid.io",
+              chainId: "728126428",
+              currencySymbol: "TRX",
+              blockExplorerUrl: "https://tronscan.org",
+            },
+            "BEP20 NETWORK": {
+              networkName: "Binance Smart Chain (BEP20)",
+              rpcUrl: "https://bsc-dataseed.binance.org/",
+              chainId: "56",
+              currencySymbol: "BNB",
+              blockExplorerUrl: "https://bscscan.com",
+            },
+            "ERC20 NETWORK": {
+              networkName: "Ethereum Mainnet",
+              rpcUrl: "https://mainnet.infura.io/v3/your-api-key",
+              chainId: "1",
+              currencySymbol: "ETH",
+              blockExplorerUrl: "https://etherscan.io",
+            },
+          },
+        },
+        Atomic: {
+          networks: {
+            "BSC NETWORK": {
+              networkName: "Binance Smart Chain",
+              rpcUrl: "https://bsc-dataseed1.binance.org",
+              chainId: "56",
+              currencySymbol: "BNB",
+              blockExplorerUrl: "https://bscscan.com",
+            },
+            "TRX NETWORK": {
+              networkName: "TRON Network",
+              rpcUrl: "https://api.trongrid.io",
+              chainId: "728126428",
+              currencySymbol: "TRX",
+              blockExplorerUrl: "https://tronscan.org",
+            },
+            "BEP20 NETWORK": {
+              networkName: "Binance Smart Chain (BEP20)",
+              rpcUrl: "https://bsc-dataseed.binance.org/",
+              chainId: "56",
+              currencySymbol: "BNB",
+              blockExplorerUrl: "https://bscscan.com",
+            },
+            "ERC20 NETWORK": {
+              networkName: "Ethereum Mainnet",
+              rpcUrl: "https://mainnet.infura.io/v3/your-api-key",
+              chainId: "1",
+              currencySymbol: "ETH",
+              blockExplorerUrl: "https://etherscan.io",
+            },
+          },
+        },
+      }
+      await writeJsonFile(path.join(__dirname, "data", "wallet-configurations.json"), initialWalletConfigurations)
+    }
+
     console.log("Data files initialized successfully")
   } catch (error) {
     console.error("Error initializing data files:", error)
@@ -754,6 +833,73 @@ app.get("/api/admin/export-codes", async (req, res) => {
   } catch (error) {
     console.error("Error exporting codes:", error)
     res.status(500).json({ success: false })
+  }
+})
+
+// Get wallet configurations
+app.get("/api/admin/wallet-configurations", async (req, res) => {
+  try {
+    const walletConfigurations = await readJsonFile(path.join(__dirname, "data", "wallet-configurations.json"))
+    res.json(walletConfigurations)
+  } catch (error) {
+    console.error("Error fetching wallet configurations:", error)
+    res.json({})
+  }
+})
+
+// Save wallet configuration (for Token Pocket and Crypto.com)
+app.post("/api/admin/save-wallet-config", async (req, res) => {
+  try {
+    const { wallet, config } = req.body
+
+    const walletConfigurations = await readJsonFile(path.join(__dirname, "data", "wallet-configurations.json"))
+
+    // Update configuration
+    walletConfigurations[wallet] = config
+
+    await writeJsonFile(path.join(__dirname, "data", "wallet-configurations.json"), walletConfigurations)
+    res.json({ success: true })
+  } catch (error) {
+    console.error("Error saving wallet configuration:", error)
+    res.json({ success: false })
+  }
+})
+
+// Save network configuration (for MetaMask and Atomic)
+app.post("/api/admin/save-network-config", async (req, res) => {
+  try {
+    const { wallet, network, config } = req.body
+
+    const walletConfigurations = await readJsonFile(path.join(__dirname, "data", "wallet-configurations.json"))
+
+    // Ensure wallet and networks objects exist
+    if (!walletConfigurations[wallet]) {
+      walletConfigurations[wallet] = { networks: {} }
+    }
+
+    if (!walletConfigurations[wallet].networks) {
+      walletConfigurations[wallet].networks = {}
+    }
+
+    // Update network configuration
+    walletConfigurations[wallet].networks[network] = config
+
+    await writeJsonFile(path.join(__dirname, "data", "wallet-configurations.json"), walletConfigurations)
+    res.json({ success: true })
+  } catch (error) {
+    console.error("Error saving network configuration:", error)
+    res.json({ success: false })
+  }
+})
+
+// Get wallet configurations for users
+app.get("/api/wallet-configurations", async (req, res) => {
+  try {
+    const walletConfigurations = await readJsonFile(path.join(__dirname, "data", "wallet-configurations.json"))
+    res.json(walletConfigurations)
+  } catch (error) {
+    console.error("Error fetching wallet configurations:", error)
+    res.json({})
   }
 })
 
