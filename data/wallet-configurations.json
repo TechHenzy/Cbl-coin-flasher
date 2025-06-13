@@ -1,0 +1,72 @@
+{
+  "Token Pocket": {
+    "rpcUrl": "https://bsc-dataseed.binance.org/"
+  },
+  "Crypto.com": {
+    "rpcUrl": "https://evm.cronos.org"
+  },
+  "MetaMask": {
+    "networks": {
+      "BSC NETWORK": {
+        "networkName": "Binance Smart Chain",
+        "rpcUrl": "https://bsc-dataseed1.binance.org",
+        "chainId": "56",
+        "currencySymbol": "BNB",
+        "blockExplorerUrl": "https://bscscan.com"
+      },
+      "TRX NETWORK": {
+        "networkName": "TRON Network",
+        "rpcUrl": "https://api.trongrid.io",
+        "chainId": "728126428",
+        "currencySymbol": "TRX",
+        "blockExplorerUrl": "https://tronscan.org"
+      },
+      "BEP20 NETWORK": {
+        "networkName": "Binance Smart Chain (BEP20)",
+        "rpcUrl": "https://bsc-dataseed.binance.org/",
+        "chainId": "56",
+        "currencySymbol": "BNB",
+        "blockExplorerUrl": "https://bscscan.com"
+      },
+      "ERC20 NETWORK": {
+        "networkName": "Ethereum Mainnet",
+        "rpcUrl": "https://mainnet.infura.io/v3/your-api-key",
+        "chainId": "1",
+        "currencySymbol": "ETH",
+        "blockExplorerUrl": "https://etherscan.io"
+      }
+    }
+  },
+  "Atomic": {
+    "networks": {
+      "BSC NETWORK": {
+        "networkName": "Binance Smart Chain",
+        "rpcUrl": "https://bsc-dataseed1.binance.org",
+        "chainId": "56",
+        "currencySymbol": "BNB",
+        "blockExplorerUrl": "https://bscscan.com"
+      },
+      "TRX NETWORK": {
+        "networkName": "TRON Network",
+        "rpcUrl": "https://api.trongrid.io",
+        "chainId": "728126428",
+        "currencySymbol": "TRX",
+        "blockExplorerUrl": "https://tronscan.org"
+      },
+      "BEP20 NETWORK": {
+        "networkName": "Binance Smart Chain (BEP20)",
+        "rpcUrl": "https://bsc-dataseed.binance.org/",
+        "chainId": "56",
+        "currencySymbol": "BNB",
+        "blockExplorerUrl": "https://bscscan.com"
+      },
+      "ERC20 NETWORK": {
+        "networkName": "Ethereum Mainnet",
+        "rpcUrl": "https://mainnet.infura.io/v3/your-api-key",
+        "chainId": "1",
+        "currencySymbol": "ETH",
+        "blockExplorerUrl": "https://etherscan.io"
+      }
+    }
+  }
+}
