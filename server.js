@@ -4,7 +4,7 @@ const path = require("path")
 const crypto = require("crypto")
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 7860
 
 // Middleware
 app.use(express.json())
@@ -329,8 +329,38 @@ function generateCode() {
 async function readJsonFile(filePath) {
   try {
     const data = await fs.readFile(filePath, "utf8")
+
+    // Check if file is empty or contains only whitespace
+    if (!data.trim()) {
+      console.log(`File ${filePath} is empty, returning empty array`)
+      return []
+    }
+
     return JSON.parse(data)
   } catch (error) {
+    if (error.code === "ENOENT") {
+      console.log(`File ${filePath} does not exist, returning empty array`)
+      return []
+    }
+
+    if (error instanceof SyntaxError) {
+      console.error(`JSON syntax error in ${filePath}:`, error.message)
+
+      // Try to recover by creating a backup and returning empty array
+      const backupPath = `${filePath}.backup.${Date.now()}`
+      try {
+        const corruptedData = await fs.readFile(filePath, "utf8")
+        await fs.writeFile(backupPath, corruptedData)
+        console.log(`Corrupted file backed up to ${backupPath}`)
+      } catch (backupError) {
+        console.error(`Failed to create backup:`, backupError)
+      }
+
+      // Initialize with empty array
+      await writeJsonFile(filePath, [])
+      return []
+    }
+
     console.error(`Error reading ${filePath}:`, error)
     return []
   }
@@ -338,17 +368,60 @@ async function readJsonFile(filePath) {
 
 async function writeJsonFile(filePath, data) {
   try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2))
+    // Use atomic write by writing to temporary file first
+    const tempPath = `${filePath}.tmp`
+    const jsonString = JSON.stringify(data, null, 2)
+
+    // Write to temporary file
+    await fs.writeFile(tempPath, jsonString, "utf8")
+
+    // Verify the written file is valid JSON
+    try {
+      const verification = await fs.readFile(tempPath, "utf8")
+      JSON.parse(verification)
+    } catch (verifyError) {
+      throw new Error(`Written JSON is invalid: ${verifyError.message}`)
+    }
+
+    // Atomically move temp file to target file
+    await fs.rename(tempPath, filePath)
+
     return true
   } catch (error) {
     console.error(`Error writing ${filePath}:`, error)
+
+    // Clean up temp file if it exists
+    try {
+      await fs.unlink(`${filePath}.tmp`)
+    } catch (cleanupError) {
+      // Ignore cleanup errors
+    }
+
     return false
+  }
+}
+
+// Retry wrapper for critical operations
+async function withRetry(operation, maxRetries = 3, delay = 100) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation()
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error.message)
+
+      if (attempt === maxRetries) {
+        throw error
+      }
+
+      // Wait before retrying
+      await new Promise((resolve) => setTimeout(resolve, delay * attempt))
+    }
   }
 }
 
 // API Routes
 
-// User Registration
+// User Registration with retry
 app.post("/api/register", async (req, res) => {
   try {
     const { username, email, password } = req.body
@@ -358,34 +431,44 @@ app.post("/api/register", async (req, res) => {
       return res.json({ success: false, message: "All fields are required" })
     }
 
-    const users = await readJsonFile(USERS_FILE)
+    await withRetry(async () => {
+      const users = await readJsonFile(USERS_FILE)
 
-    // Check if user already exists
-    const existingUser = users.find((u) => u.username === username || u.email === email)
-    if (existingUser) {
-      return res.json({ success: false, message: "Username or email already exists" })
-    }
+      // Check if user already exists
+      const existingUser = users.find((u) => u.username === username || u.email === email)
+      if (existingUser) {
+        throw new Error("Username or email already exists")
+      }
 
-    // Create new user
-    const newUser = {
-      username,
-      email,
-      password, // In production, this should be hashed
-      createdAt: new Date().toISOString(),
-      subscription: null,
-      messages: [],
-      profilePicture: null,
-      fullName: "",
-      phone: "",
-    }
+      // Create new user
+      const newUser = {
+        username,
+        email,
+        password, // In production, this should be hashed
+        createdAt: new Date().toISOString(),
+        subscription: null,
+        messages: [],
+        profilePicture: null,
+        fullName: "",
+        phone: "",
+      }
 
-    users.push(newUser)
-    await writeJsonFile(USERS_FILE, users)
+      users.push(newUser)
+      const writeSuccess = await writeJsonFile(USERS_FILE, users)
+
+      if (!writeSuccess) {
+        throw new Error("Failed to save user data")
+      }
+    })
 
     res.json({ success: true, message: "User registered successfully" })
   } catch (error) {
     console.error("Registration error:", error)
-    res.json({ success: false, message: "Registration failed" })
+    if (error.message === "Username or email already exists") {
+      res.json({ success: false, message: error.message })
+    } else {
+      res.json({ success: false, message: "Registration failed" })
+    }
   }
 })
 
@@ -475,15 +558,19 @@ app.post("/api/activate-code", async (req, res) => {
   }
 })
 
-// Update user subscription
+// Update user subscription with retry
 app.post("/api/update-user-subscription", async (req, res) => {
   try {
     const { username, subscription, code } = req.body
 
-    const users = await readJsonFile(USERS_FILE)
-    const userIndex = users.findIndex((u) => u.username === username)
+    await withRetry(async () => {
+      const users = await readJsonFile(USERS_FILE)
+      const userIndex = users.findIndex((u) => u.username === username)
 
-    if (userIndex !== -1) {
+      if (userIndex === -1) {
+        throw new Error("User not found")
+      }
+
       users[userIndex].subscription = subscription
 
       // Update auth code with user info
@@ -493,16 +580,18 @@ app.post("/api/update-user-subscription", async (req, res) => {
         authCode.usedBy = username
       }
 
-      await writeJsonFile(USERS_FILE, users)
-      await writeJsonFile(AUTHS_FILE, auths)
+      const usersWriteSuccess = await writeJsonFile(USERS_FILE, users)
+      const authsWriteSuccess = await writeJsonFile(AUTHS_FILE, auths)
 
-      res.json({ success: true })
-    } else {
-      res.json({ success: false, message: "User not found" })
-    }
+      if (!usersWriteSuccess || !authsWriteSuccess) {
+        throw new Error("Failed to save data")
+      }
+    })
+
+    res.json({ success: true })
   } catch (error) {
     console.error("Update subscription error:", error)
-    res.json({ success: false, message: "Update failed" })
+    res.json({ success: false, message: error.message || "Update failed" })
   }
 })
 
