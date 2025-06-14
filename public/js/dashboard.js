@@ -293,7 +293,7 @@ function showWallets(plan) {
 
 function subscribe(plan, price) {
   const whatsappNumber = "17062481811" // Replace with actual WhatsApp number
-  const message = `Hi, I choose ${plan} plan to subscribe to your coin flasher for ₦${price.toLocaleString()}`
+  const message = `Hi cbl supporter 😯, I choose ${plan} plan to subscribe to your coin flasher for ₦${price.toLocaleString()}`
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
   window.open(whatsappUrl, "_blank")
 
